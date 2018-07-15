@@ -10,6 +10,18 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.9"
+    id 'io.franzbecker.gradle-lombok' version '1.7'
+}
+project.afterEvaluate {
+
+    project.tasks.compileQuerydsl.options.compilerArgs = [
+            "-proc:only",
+            "-processor", project.querydsl.processors() +
+                    ',lombok.launch.AnnotationProcessorHider$AnnotationProcessor'
+    ]
+}
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
@@ -25,10 +37,14 @@ repositories {
 
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+    //compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    //compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 
+    //compile group: 'com.querydsl', name: 'querydsl-mongodb', version: '4.2.1'
+    //compile group: 'com.mysema.querydsl', name: 'querydsl-mongodb', version: '3.7.4'
+    //compile group: 'com.mysema.querydsl', name: 'querydsl-apt', version: '3.7.4'
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile group: 'com.querydsl', name: 'querydsl-mongodb', version: '4.2.1'
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     //compile('org.springframework.boot:spring-boot-starter-security')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
@@ -37,5 +53,9 @@ dependencies {
     compileOnly('org.projectlombok:lombok')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.security:spring-security-test')
-    testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    //testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+}
+
+querydsl {
+    springDataMongo = true
 }
