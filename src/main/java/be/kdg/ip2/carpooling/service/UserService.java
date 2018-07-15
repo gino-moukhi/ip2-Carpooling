@@ -5,11 +5,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
 public interface UserService {
     User findUserById(String id) throws UserServiceException;
+
     User findUserByEmail(String email) throws UserServiceException;
+
     List<User> findAllUsers();
 
     void addUser(User user) throws UserServiceException;
@@ -17,6 +18,10 @@ public interface UserService {
     void updateUser(User user) throws UserServiceException;
 
     void deleteUser(String id) throws UserServiceException;
+
+    void deleteAll();
+
+    void saveWithCheck(User user) throws UserServiceException;
 
     List<User> findUserByAgelessThan(int max) throws UserServiceException;
 

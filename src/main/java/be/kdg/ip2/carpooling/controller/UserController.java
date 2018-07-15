@@ -1,14 +1,9 @@
 package be.kdg.ip2.carpooling.controller;
 
-import be.kdg.ip2.carpooling.domain.QUser;
 import be.kdg.ip2.carpooling.domain.User;
-import be.kdg.ip2.carpooling.repository.UserRepository;
 import be.kdg.ip2.carpooling.service.UserService;
 import be.kdg.ip2.carpooling.service.UserServiceException;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -62,7 +57,6 @@ public class UserController {
         try {
             foundUsers = userService.findUserByAgelessThan(max);
         } catch (UserServiceException e) {
-            //ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             e.printStackTrace();
         }
         return foundUsers;
@@ -74,7 +68,6 @@ public class UserController {
         try {
             foundUsers = userService.findByCity(city);
         } catch (UserServiceException e) {
-            //ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             e.printStackTrace();
         }
         return foundUsers;
@@ -86,7 +79,6 @@ public class UserController {
         try {
             foundUsers = userService.findByStreet(street);
         } catch (UserServiceException e) {
-            //ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             e.printStackTrace();
         }
         return foundUsers;
@@ -98,7 +90,6 @@ public class UserController {
         try {
             foundUsers = userService.findClosestWithEnoughSpace(city,passengers);
         } catch (UserServiceException e) {
-            //ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             e.printStackTrace();
         }
         return foundUsers;

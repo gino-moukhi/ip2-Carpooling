@@ -1,25 +1,20 @@
 package be.kdg.ip2.carpooling.service;
 
-import be.kdg.ip2.carpooling.configuration.SpringMongoConfig;
 import be.kdg.ip2.carpooling.domain.QUser;
 import be.kdg.ip2.carpooling.domain.User;
 import be.kdg.ip2.carpooling.repository.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
-    private ApplicationContext ctx = new AnnotationConfigApplicationContext(SpringMongoConfig.class);
-    private MongoOperations mongoOperations = (MongoOperations) ctx.getBean("mongoTemplate");
-
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
@@ -29,12 +24,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserById(String id) throws UserServiceException {
         //mongoOperations.findById(id,User.class);
-        return null;
+        return userRepository.findUserById(id);
     }
 
     @Override
     public User findUserByEmail(String email) throws UserServiceException {
-        return null;
+        return userRepository.findUserByEmail(email);
     }
 
     @Override
@@ -63,10 +58,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+
+    @Override
+    public void saveWithCheck(User user) throws UserServiceException {
+        User foundUser = userRepository.findUserByEmailAndPassword(user.getEmail(),user.getPassword());
+        if (foundUser != null) {
+            user.setId(foundUser.getId());
+        }
+        userRepository.save(user);
+    }
+
+    @Override
     public List<User> findUserByAgelessThan(int max) throws UserServiceException {
         return userRepository.findUserByAgeLessThan(max);
     }
 
+    //This method uses the query created with the @Query annotation in UserRepository
     @Override
     public List<User> findByCity(String city) throws UserServiceException {
         return userRepository.findByCity(city);

@@ -1,7 +1,9 @@
 package be.kdg.ip2.carpooling;
 
 import be.kdg.ip2.carpooling.domain.*;
-import be.kdg.ip2.carpooling.repository.UserRepository;
+import be.kdg.ip2.carpooling.service.UserService;
+import be.kdg.ip2.carpooling.service.UserServiceException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -10,12 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DbSeeder implements CommandLineRunner {
-    private UserRepository userRepo;
+    private UserService userService;
 
     @Autowired
-    public DbSeeder(UserRepository userRepo) {
-        this.userRepo = userRepo;
+    public DbSeeder(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -35,13 +38,19 @@ public class DbSeeder implements CommandLineRunner {
         User sophie = new User("sophie.kotton@gmail.com", "Barbie",
                 new Name("Sophie", "Kotton"),
                 new Address("Wilgendaalstraat", 15, 2900, "Schoten"),
-                27, Gender.FEMALE, true,
+                27, Gender.FEMALE, false,
                 new Vehicle("Toyota", "Yaris", 5.1, 3));
 
-        // DROP
-        userRepo.deleteAll();
-        // ADD
+        // DELETE
+        //userService.deleteAll();
+        // INSERT OR UPDATE (depends on the fact that the users exists in the collection or not)
         List<User> users = Arrays.asList(gino, jimmy, sophie);
-        userRepo.saveAll(users);
+        users.forEach(user -> {
+            try {
+                userService.saveWithCheck(user);
+            } catch (UserServiceException e) {
+                log.error("Something went wrong when calling the SaveWithCheck function in the userService " + e);
+            }
+        });
     }
 }
