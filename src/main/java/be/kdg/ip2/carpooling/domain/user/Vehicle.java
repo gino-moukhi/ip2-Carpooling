@@ -8,11 +8,11 @@ import lombok.ToString;
 @Getter @Setter @NoArgsConstructor @ToString
 public class Vehicle {
     private String brand;
-    private String type;
+    private VehicleType type;
     private double fuelConsumption;
     private int numberOfPassengers;
 
-    public Vehicle(String brand, String type, double fuelConsumption, int numberOfPassengers) {
+    public Vehicle(String brand, VehicleType type, double fuelConsumption, int numberOfPassengers) {
         this.brand = brand;
         this.type = type;
         this.fuelConsumption = fuelConsumption;

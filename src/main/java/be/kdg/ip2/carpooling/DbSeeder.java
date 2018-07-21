@@ -27,19 +27,19 @@ public class DbSeeder implements CommandLineRunner {
                 new Name("Gino", "Moukhi"),
                 new Address("Brugstraat", 103, 2960, "Brecht"),
                 21, Gender.MALE, false,
-                new Vehicle("Mercedes", "CLA180", 4.2, 3));
+                new Vehicle("Mercedes", VehicleType.SEDAN, 4.2, 3));
 
         User jimmy = new User("jimmy.kotton@gmail.com", "Gigedy",
                 new Name("Jimmy", "Kotton"),
                 new Address("Eikenlei", 8, 2960, "Brecht"),
                 25, Gender.MALE, true,
-                new Vehicle("Dodge", "Ram", 8.0, 4));
+                new Vehicle("Dodge", VehicleType.SUV, 8.0, 4));
 
         User sophie = new User("sophie.kotton@gmail.com", "Barbie",
                 new Name("Sophie", "Kotton"),
                 new Address("Wilgendaalstraat", 15, 2900, "Schoten"),
                 27, Gender.FEMALE, true,
-                new Vehicle("Toyota", "Yaris", 5.1, 3));
+                new Vehicle("Toyota", VehicleType.HATCHBAG, 5.1, 3));
 
         // DELETE
         //userService.deleteAll();

@@ -3,6 +3,7 @@ package be.kdg.ip2.carpooling.unit;
 import be.kdg.ip2.carpooling.domain.user.Address;
 import be.kdg.ip2.carpooling.domain.user.User;
 import be.kdg.ip2.carpooling.domain.user.Vehicle;
+import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.repository.UserRepository;
 //import lombok.extern.slf4j.Slf4j;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class UserRepoTest {
         User user2 = repo.findUserByEmail("jimmy.kotton@gmail.com");
         User user3 = repo.findUserByEmail("sophie.kotton@gmail.com");
         Address address = new Address("Eikenlei", 8, 2960, "Brecht");
-        Vehicle vehicle = new Vehicle("Toyota", "Yaris", 5.1, 3);
+        Vehicle vehicle = new Vehicle("Toyota", VehicleType.HATCHBAG, 5.1, 3);
         assertEquals("Gino Moukhi", user1.getName().toString());
         assertEquals(address.getStreet(), user2.getAddress().getStreet());
         assertEquals(address.getCity(), user2.getAddress().getCity());
