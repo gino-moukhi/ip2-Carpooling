@@ -1,12 +1,11 @@
-package be.kdg.ip2.carpooling.domain;
+package be.kdg.ip2.carpooling.domain.user;
 
+import be.kdg.ip2.carpooling.dto.UserDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.IndexDirection;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "users")
@@ -38,5 +37,16 @@ public class User {
         this.gender = gender;
         this.smoker = smoker;
         this.vehicle = vehicle;
+    }
+
+    public User(UserDto userDto) {
+        this.email = userDto.getEmail();
+        this.password = userDto.getPassword();
+        this.name = userDto.getName();
+        this.address = userDto.getAddress();
+        this.age = userDto.getAge();
+        this.gender = userDto.getGender();
+        this.smoker = userDto.isSmoker();
+        this.vehicle = userDto.getVehicle();
     }
 }

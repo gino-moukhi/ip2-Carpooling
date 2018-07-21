@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.domain;
+package be.kdg.ip2.carpooling.domain.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package be.kdg.ip2.carpooling.service;
 
-import be.kdg.ip2.carpooling.domain.QUser;
-import be.kdg.ip2.carpooling.domain.User;
+import be.kdg.ip2.carpooling.domain.user.QUser;
+import be.kdg.ip2.carpooling.domain.user.User;
 import be.kdg.ip2.carpooling.repository.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +43,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addUser(User user) throws UserServiceException {
-        userRepository.insert(user);
+    public User addUser(User user) throws UserServiceException {
+        return userRepository.insert(user);
     }
 
     @Override
-    public void updateUser(User user) throws UserServiceException {
-        userRepository.save(user);
+    public User updateUser(User user) throws UserServiceException {
+        /*User foundUser = userRepository.findUserById(user.getId());
+        if (!foundUser.getEmail().equals(user.getEmail()) && !user.getEmail().isEmpty()) {
+            foundUser.setEmail(user.getEmail());
+        }*/
+        //return null;
+        return saveWithCheck(user, true);
+        //return userRepository.save(user);
     }
 
     @Override
@@ -63,12 +69,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveWithCheck(User user) throws UserServiceException {
-        User foundUser = userRepository.findUserByEmailAndPassword(user.getEmail(),user.getPassword());
-        if (foundUser != null) {
-            user.setId(foundUser.getId());
+    public User saveWithCheck(User user, boolean useIdOrEmail) throws UserServiceException {
+        User foundUser;
+        log.info("USER TO UPDATE 1: " + user);
+        if (useIdOrEmail) {
+            foundUser = userRepository.findUserById(user.getId());
+            log.info("USER TO UPDATE 2: " + foundUser);
+            foundUser = user;
+            log.info("USER TO UPDATE 3: " + foundUser);
+        } else {
+            foundUser = userRepository.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
+            if (foundUser != null) {
+                user.setId(foundUser.getId());
+            }
         }
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override

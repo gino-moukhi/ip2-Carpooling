@@ -1,6 +1,7 @@
 package be.kdg.ip2.carpooling.controller;
 
-import be.kdg.ip2.carpooling.domain.User;
+import be.kdg.ip2.carpooling.domain.user.User;
+import be.kdg.ip2.carpooling.dto.UserDto;
 import be.kdg.ip2.carpooling.service.UserService;
 import be.kdg.ip2.carpooling.service.UserServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,22 +26,15 @@ public class UserController {
         return userService.findAllUsers();
     }
 
-    @PutMapping
-    public void insert(@RequestBody User user) {
-        try {
-            userService.addUser(user);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
+    @PostMapping
+    public User insert(@RequestBody UserDto userDto) throws UserServiceException {
+        User user = new User(userDto);
+        return userService.addUser(user);
     }
 
-    @PostMapping
-    public void update(@RequestBody User user) {
-        try {
-            userService.updateUser(user);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
+    @PutMapping
+    public User update(@RequestBody User user) throws UserServiceException {
+        return userService.updateUser(user);
     }
 
     @DeleteMapping("/{id}")
@@ -49,6 +44,11 @@ public class UserController {
         } catch (UserServiceException e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("/{id}")
+    public User getById(@PathVariable("id")String id) throws UserServiceException {
+        return userService.findUserById(id);
     }
 
     @GetMapping("/age/{age}")

@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.domain;
+package be.kdg.ip2.carpooling.domain.user;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -15,7 +15,7 @@ import com.querydsl.core.types.Path;
 @Generated("com.querydsl.codegen.EmbeddableSerializer")
 public class QName extends BeanPath<Name> {
 
-    private static final long serialVersionUID = -115874361L;
+    private static final long serialVersionUID = -1936720558L;
 
     public static final QName name = new QName("name");
 

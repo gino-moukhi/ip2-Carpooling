@@ -1,6 +1,6 @@
 package be.kdg.ip2.carpooling.repository;
 
-import be.kdg.ip2.carpooling.domain.User;
+import be.kdg.ip2.carpooling.domain.user.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;

@@ -1,26 +1,29 @@
-package be.kdg.ip2.carpooling.domain;
+package be.kdg.ip2.carpooling.domain.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class Name {
-    @Setter
     private String firstName;
-    @Setter
     private String lastName;
-    private String fullName;
 
     public Name(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.fullName = firstName + " " + lastName;
+    }
+
+    private String getFullName() {
+        return firstName + " " + lastName;
     }
 
     @Override
     public String toString() {
         return getFullName();
     }
+
+
 }

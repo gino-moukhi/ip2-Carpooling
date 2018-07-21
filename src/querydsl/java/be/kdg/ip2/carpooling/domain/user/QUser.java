@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.domain;
+package be.kdg.ip2.carpooling.domain.user;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,7 +16,7 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.EntitySerializer")
 public class QUser extends EntityPathBase<User> {
 
-    private static final long serialVersionUID = -115648761L;
+    private static final long serialVersionUID = -1936494958L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

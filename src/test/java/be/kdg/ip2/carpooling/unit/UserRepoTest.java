@@ -1,8 +1,8 @@
 package be.kdg.ip2.carpooling.unit;
 
-import be.kdg.ip2.carpooling.domain.Address;
-import be.kdg.ip2.carpooling.domain.User;
-import be.kdg.ip2.carpooling.domain.Vehicle;
+import be.kdg.ip2.carpooling.domain.user.Address;
+import be.kdg.ip2.carpooling.domain.user.User;
+import be.kdg.ip2.carpooling.domain.user.Vehicle;
 import be.kdg.ip2.carpooling.repository.UserRepository;
 //import lombok.extern.slf4j.Slf4j;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -44,7 +40,7 @@ public class UserRepoTest {
         User user3 = repo.findUserByEmail("sophie.kotton@gmail.com");
         Address address = new Address("Eikenlei", 8, 2960, "Brecht");
         Vehicle vehicle = new Vehicle("Toyota", "Yaris", 5.1, 3);
-        assertEquals("Gino Moukhi", user1.getName().getFullName());
+        assertEquals("Gino Moukhi", user1.getName().toString());
         assertEquals(address.getStreet(), user2.getAddress().getStreet());
         assertEquals(address.getCity(), user2.getAddress().getCity());
         assertEquals(address.getStreetNumber(), user2.getAddress().getStreetNumber());

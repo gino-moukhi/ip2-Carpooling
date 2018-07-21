@@ -1,6 +1,6 @@
 package be.kdg.ip2.carpooling;
 
-import be.kdg.ip2.carpooling.domain.*;
+import be.kdg.ip2.carpooling.domain.user.*;
 import be.kdg.ip2.carpooling.service.UserService;
 import be.kdg.ip2.carpooling.service.UserServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class DbSeeder implements CommandLineRunner {
         User sophie = new User("sophie.kotton@gmail.com", "Barbie",
                 new Name("Sophie", "Kotton"),
                 new Address("Wilgendaalstraat", 15, 2900, "Schoten"),
-                27, Gender.FEMALE, false,
+                27, Gender.FEMALE, true,
                 new Vehicle("Toyota", "Yaris", 5.1, 3));
 
         // DELETE
@@ -47,7 +47,7 @@ public class DbSeeder implements CommandLineRunner {
         List<User> users = Arrays.asList(gino, jimmy, sophie);
         users.forEach(user -> {
             try {
-                userService.saveWithCheck(user);
+                userService.saveWithCheck(user, false);
             } catch (UserServiceException e) {
                 log.error("Something went wrong when calling the SaveWithCheck function in the userService " + e);
             }
