@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.service;
+package be.kdg.ip2.carpooling.service.user;
 
 public class UserServiceException extends Exception {
     public UserServiceException(String message) {

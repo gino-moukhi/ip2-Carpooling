@@ -1,9 +1,6 @@
 package be.kdg.ip2.carpooling.domain.route;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +9,7 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class RouteDefinition {
     private RouteLocation start;
     private RouteLocation finish;
@@ -23,12 +21,5 @@ public class RouteDefinition {
         this.finish = finish;
         this.type = type;
         waypoints = new ArrayList<>();
-    }
-
-    public RouteDefinition(RouteLocation start, RouteLocation finish, RouteType type, List<RouteLocation> waypoints) {
-        this.start = start;
-        this.finish = finish;
-        this.type = type;
-        this.waypoints = waypoints;
     }
 }

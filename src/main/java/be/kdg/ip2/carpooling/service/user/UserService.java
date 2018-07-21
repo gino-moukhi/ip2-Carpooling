@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.service;
+package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.User;
 import org.springframework.stereotype.Service;

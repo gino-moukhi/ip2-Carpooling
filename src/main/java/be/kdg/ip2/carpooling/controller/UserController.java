@@ -2,8 +2,8 @@ package be.kdg.ip2.carpooling.controller;
 
 import be.kdg.ip2.carpooling.domain.user.User;
 import be.kdg.ip2.carpooling.dto.UserDto;
-import be.kdg.ip2.carpooling.service.UserService;
-import be.kdg.ip2.carpooling.service.UserServiceException;
+import be.kdg.ip2.carpooling.service.user.UserService;
+import be.kdg.ip2.carpooling.service.user.UserServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +27,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User insert(@RequestBody UserDto userDto) throws UserServiceException {
-        User user = new User(userDto);
+    public User insert(@RequestBody User user) throws UserServiceException {
         return userService.addUser(user);
     }
 

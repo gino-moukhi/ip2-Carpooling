@@ -23,4 +23,6 @@ public interface UserRepository extends MongoRepository<User, String>, QuerydslP
 
     @Query(value = "{'address.city':?0}")
     List<User> findByCity(String city);
+
+    List<User> findUsersByAddress_Street(String streetName);
 }

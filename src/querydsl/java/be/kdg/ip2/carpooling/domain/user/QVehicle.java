@@ -25,7 +25,7 @@ public class QVehicle extends BeanPath<Vehicle> {
 
     public final NumberPath<Integer> numberOfPassengers = createNumber("numberOfPassengers", Integer.class);
 
-    public final StringPath type = createString("type");
+    public final EnumPath<VehicleType> type = createEnum("type", VehicleType.class);
 
     public QVehicle(String variable) {
         super(Vehicle.class, forVariable(variable));

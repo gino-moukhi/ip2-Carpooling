@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.service;
+package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.QUser;
 import be.kdg.ip2.carpooling.domain.user.User;
@@ -99,10 +99,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findByStreet(String street) throws UserServiceException {
-        QUser qUser = new QUser("user");
+        /*QUser qUser = new QUser("user");
         BooleanExpression filterByStreet = qUser.address.street.eq(street);
+        List<User> all = (List<User>) userRepository.findAll(filterByStreet);
+        log.info(all.toString());*/
 
-        return (List<User>) userRepository.findAll(filterByStreet);
+        List<User> all2 = userRepository.findUsersByAddress_Street(street);
+        log.info(all2.toString());
+
+        return all2;
     }
 
     @Override
