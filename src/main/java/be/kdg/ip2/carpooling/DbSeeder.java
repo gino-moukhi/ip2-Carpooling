@@ -12,6 +12,7 @@ import be.kdg.ip2.carpooling.service.user.UserServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -73,24 +74,31 @@ public class DbSeeder implements CommandLineRunner {
         List<RouteLocation> waypointsForRoute1 = new ArrayList<>();
         List<RouteLocation> waypointsForRoute2 = new ArrayList<>();
         LocalDateTime timestamp = LocalDateTime.now();
-        waypointsForRoute1.add(new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821));
+        //waypointsForRoute1.add(new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821));
+        waypointsForRoute1.add(new RouteLocation("Eikenlei 8, Brecht", new GeoJsonPoint(51.303687, 4.566821)));
 
         Route route1 = new Route(new RouteDefinition(
-                new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580),
-                new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248),
+                //new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580),
+                new RouteLocation("Brugstraat 103, Brecht", new GeoJsonPoint(51.297413, 4.573580)),
+                //new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248),
+                new RouteLocation("Wilgendaalstraat 15, Schoten", new GeoJsonPoint(51.253799, 4.495248)),
                 RouteType.RETURN,
                 waypointsForRoute1),
                 VehicleType.SEDAN,
                 timestamp,
                 3
         );
-        waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580));
-        waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248));
+        //waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580));
+        waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", new GeoJsonPoint(51.297413, 4.573580)));
+        //waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248));
+        waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", new GeoJsonPoint(51.253799, 4.495248)));
         timestamp = LocalDateTime.of(2018,7,28,18,0);
 
         Route route2 = new Route(new RouteDefinition(
-                new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821),
-                new RouteLocation("Groenplaats, Antwerpen", 51.218962, 4.402153),
+                //new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821),
+                new RouteLocation("Eikenlei 8, Brecht", new GeoJsonPoint(51.303687, 4.566821)),
+                //new RouteLocation("Groenplaats, Antwerpen", 51.218962, 4.402153),
+                new RouteLocation("Groenplaats, Antwerpen", new GeoJsonPoint(51.218962, 4.402153)),
                 RouteType.SINGLE,
                 waypointsForRoute2),
                 VehicleType.SUV,
@@ -99,7 +107,7 @@ public class DbSeeder implements CommandLineRunner {
         );
 
         //DELETE
-        //routeService.deleteAll();
+        routeService.deleteAll();
 
         List<Route> routes = Arrays.asList(route1, route2);
         routes.forEach(route -> {

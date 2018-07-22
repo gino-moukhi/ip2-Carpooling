@@ -5,6 +5,9 @@ import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.repository.RouteRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+//import com.mongodb.client.model.geojson.Point;
+import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -75,5 +78,10 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public Route findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(String startLocationName, String finishLocationName) throws RouteServiceException {
         return routeRepository.findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(startLocationName, finishLocationName);
+    }
+
+    @Override
+    public List<Route> findRoutesByDefinition_Start_LocationNear(Point point, Distance distance) throws RouteServiceException {
+        return routeRepository.findRoutesByDefinition_Start_LocationNear(point, distance);
     }
 }

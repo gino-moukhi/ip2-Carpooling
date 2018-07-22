@@ -3,7 +3,13 @@ package be.kdg.ip2.carpooling.controller;
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
+//import com.mongodb.client.model.geojson.Point;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metric;
+import org.springframework.data.geo.Metrics;
+import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,5 +53,13 @@ public class RouteController {
     @DeleteMapping("/{id}")
     public void deleteAll(@PathVariable("id") String id) {
         routeService.deleteRouteById(id);
+    }
+
+
+    @GetMapping("/location/{lat}/{long}/{distance}")
+    public List<Route> getRoutesNearLocation(@PathVariable("lat") double lat,
+                                             @PathVariable("long") double lng,
+                                             @PathVariable("distance") double distance) throws RouteServiceException {
+        return routeService.findRoutesByDefinition_Start_LocationNear(new Point(lat, lng), new Distance(distance, Metrics.KILOMETERS));
     }
 }
