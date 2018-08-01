@@ -1,15 +1,14 @@
 package be.kdg.ip2.carpooling.controller;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
+import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 //import com.mongodb.client.model.geojson.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,8 +35,8 @@ public class RouteController {
     }
 
     @PostMapping
-    public Route insert(@RequestBody Route route) throws RouteServiceException {
-        return routeService.addRoute(route);
+    public Route insert(@RequestBody RouteDto dto) throws RouteServiceException {
+        return routeService.addRoute(dto);
     }
 
     @PutMapping

@@ -2,6 +2,7 @@ package be.kdg.ip2.carpooling.service.route;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
+import be.kdg.ip2.carpooling.dto.RouteDto;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -17,6 +18,8 @@ public interface RouteService {
     Route findRouteById(String id) throws RouteServiceException;
 
     Route addRoute(Route route) throws RouteServiceException;
+
+    Route addRoute(RouteDto routeDto) throws RouteServiceException;
 
     void deleteAll();
 

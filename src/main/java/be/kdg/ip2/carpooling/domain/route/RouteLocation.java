@@ -10,7 +10,5 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 @AllArgsConstructor
 public class RouteLocation {
     private String locationName;
-    /*private double lat;
-    private double lng;*/
     private GeoJsonPoint location;
 }

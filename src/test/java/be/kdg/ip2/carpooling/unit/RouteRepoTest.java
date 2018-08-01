@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,32 +31,32 @@ public class RouteRepoTest {
     @Test
     public void testDbSeeder() {
         assertEquals(2, repo.findAll().size());
-        Route route1 = repo.findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(
+        Route route1 = repo.findRouteByDefinition_Origin_LocationNameAndDefinition_Destination_LocationName(
                 "Brugstraat 103, Brecht", "Wilgendaalstraat 15, Schoten"
         );
-        Route route2 = repo.findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(
+        Route route2 = repo.findRouteByDefinition_Origin_LocationNameAndDefinition_Destination_LocationName(
                 "Eikenlei 8, Brecht", "Groenplaats, Antwerpen"
         );
-//        assertThat(route1.getDefinition().getStart().getLat(), equalTo(51.297413));
-//        assertThat(route1.getDefinition().getStart().getLng(), equalTo(4.57358));
-//        assertThat(route1.getDefinition().getFinish().getLat(), equalTo(51.253799));
-//        assertThat(route1.getDefinition().getFinish().getLng(), equalTo(4.495248));
-        assertThat(route1.getDefinition().getStart().getLocation().getX(), equalTo(51.297413));
-        assertThat(route1.getDefinition().getStart().getLocation().getY(), equalTo(4.57358));
-        assertThat(route1.getDefinition().getFinish().getLocation().getX(), equalTo(51.253799));
-        assertThat(route1.getDefinition().getFinish().getLocation().getY(), equalTo(4.495248));
+//        assertThat(route1.getDefinition().getOrigin().getLat(), equalTo(51.297413));
+//        assertThat(route1.getDefinition().getOrigin().getLng(), equalTo(4.57358));
+//        assertThat(route1.getDefinition().getDestination().getLat(), equalTo(51.253799));
+//        assertThat(route1.getDefinition().getDestination().getLng(), equalTo(4.495248));
+        assertThat(route1.getDefinition().getOrigin().getLocation().getX(), equalTo(51.297413));
+        assertThat(route1.getDefinition().getOrigin().getLocation().getY(), equalTo(4.57358));
+        assertThat(route1.getDefinition().getDestination().getLocation().getX(), equalTo(51.253799));
+        assertThat(route1.getDefinition().getDestination().getLocation().getY(), equalTo(4.495248));
 
         assertThat(route1.getVehicleType(), equalTo(VehicleType.SEDAN));
         assertThat(route1.getAvailablePassengers(), equalTo(3));
 
-//        assertThat(route2.getDefinition().getStart().getLat(), equalTo(51.303687));
-//        assertThat(route2.getDefinition().getStart().getLng(), equalTo(4.566821));
-//        assertThat(route2.getDefinition().getFinish().getLat(), equalTo(51.218962));
-//        assertThat(route2.getDefinition().getFinish().getLng(), equalTo(4.402153));
-        assertThat(route2.getDefinition().getStart().getLocation().getX(), equalTo(51.303687));
-        assertThat(route2.getDefinition().getStart().getLocation().getY(), equalTo(4.566821));
-        assertThat(route2.getDefinition().getFinish().getLocation().getX(), equalTo(51.218962));
-        assertThat(route2.getDefinition().getFinish().getLocation().getY(), equalTo(4.402153));
+//        assertThat(route2.getDefinition().getOrigin().getLat(), equalTo(51.303687));
+//        assertThat(route2.getDefinition().getOrigin().getLng(), equalTo(4.566821));
+//        assertThat(route2.getDefinition().getDestination().getLat(), equalTo(51.218962));
+//        assertThat(route2.getDefinition().getDestination().getLng(), equalTo(4.402153));
+        assertThat(route2.getDefinition().getOrigin().getLocation().getX(), equalTo(51.303687));
+        assertThat(route2.getDefinition().getOrigin().getLocation().getY(), equalTo(4.566821));
+        assertThat(route2.getDefinition().getDestination().getLocation().getX(), equalTo(51.218962));
+        assertThat(route2.getDefinition().getDestination().getLocation().getY(), equalTo(4.402153));
         assertThat(route2.getDefinition().getWaypoints().size(), equalTo(2));
         assertThat(route2.getVehicleType(), equalTo(VehicleType.SUV));
         assertThat(route2.getAvailablePassengers(), equalTo(4));
@@ -103,11 +102,11 @@ public class RouteRepoTest {
 
         List<Route> allRoutes = repo.findAll();
         assertThat(allRoutes.size(), equalTo(2));
-        assertNull(repo.findRouteByDefinition_StartAndDefinition_Finish(route1.getDefinition().getStart(), route1.getDefinition().getFinish()));
+        assertNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));
         repo.insert(route1);
         allRoutes = repo.findAll();
         assertThat(allRoutes.size(), equalTo(3));
-        assertNotNull(repo.findRouteByDefinition_StartAndDefinition_Finish(route1.getDefinition().getStart(), route1.getDefinition().getFinish()));
+        assertNotNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));
     }
 
     @Test
@@ -130,11 +129,11 @@ public class RouteRepoTest {
 
         List<Route> allRoutes = repo.findAll();
         assertThat(allRoutes.size(), equalTo(2));
-        assertNull(repo.findRouteByDefinition_StartAndDefinition_Finish(route1.getDefinition().getStart(), route1.getDefinition().getFinish()));
+        assertNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));
         repo.insert(route1);
         allRoutes = repo.findAll();
         assertThat(allRoutes.size(), equalTo(3));
-        Route found = repo.findRouteByDefinition_StartAndDefinition_Finish(route1.getDefinition().getStart(), route1.getDefinition().getFinish());
+        Route found = repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination());
         assertNotNull(found);
         route1.setId(found.getId());
         repo.save(route1);
@@ -149,13 +148,13 @@ public class RouteRepoTest {
         Route route1 = allRoutes.get(0);
         route1.setVehicleType(VehicleType.CONVERTIBLE);
         route1.setAvailablePassengers(1);
-        route1.getDefinition().getStart().setLocationName("Brugstraat 103, Sint-Job");
-        route1.getDefinition().setType(RouteType.SINGLE);
+        route1.getDefinition().getOrigin().setLocationName("Brugstraat 103, Sint-Job");
+        route1.getDefinition().setRouteType(RouteType.SINGLE);
         repo.save(route1);
         Route updatedRoute = repo.findRouteById(route1.getId());
         assertThat(updatedRoute.getVehicleType(), equalTo(VehicleType.CONVERTIBLE));
         assertThat(updatedRoute.getAvailablePassengers(), equalTo(1));
-        assertThat(updatedRoute.getDefinition().getStart().getLocationName(), equalTo("Brugstraat 103, Sint-Job"));
-        assertThat(updatedRoute.getDefinition().getType(), equalTo(RouteType.SINGLE));
+        assertThat(updatedRoute.getDefinition().getOrigin().getLocationName(), equalTo("Brugstraat 103, Sint-Job"));
+        assertThat(updatedRoute.getDefinition().getRouteType(), equalTo(RouteType.SINGLE));
     }
 }

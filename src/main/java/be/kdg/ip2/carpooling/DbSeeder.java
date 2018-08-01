@@ -107,7 +107,7 @@ public class DbSeeder implements CommandLineRunner {
         );
 
         //DELETE
-        routeService.deleteAll();
+        //routeService.deleteAll();
 
         List<Route> routes = Arrays.asList(route1, route2);
         routes.forEach(route -> {

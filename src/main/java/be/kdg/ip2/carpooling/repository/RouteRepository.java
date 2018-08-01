@@ -20,12 +20,12 @@ public interface RouteRepository extends MongoRepository<Route, String>, Queryds
 
     List<Route> findRoutesByVehicleType(VehicleType type);
 
-    Route findRouteByDefinition_StartAndDefinition_Finish(RouteLocation start, RouteLocation finish);
+    Route findRouteByDefinition_OriginAndDefinition_Destination(RouteLocation start, RouteLocation finish);
 
-    Route findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(String startLocationName, String finishLocationName);
+    Route findRouteByDefinition_Origin_LocationNameAndDefinition_Destination_LocationName(String startLocationName, String finishLocationName);
 
-    List<Route> findRouteByDefinition_Start_LocationNameAndDefinition_Start_LocationNear(String locationName, GeoJsonPoint point);
+    List<Route> findRouteByDefinition_Origin_LocationNameAndDefinition_Origin_LocationNear(String locationName, GeoJsonPoint point);
 
-    List<Route> findRoutesByDefinition_Start_LocationNear(Point point, Distance distance);
+    List<Route> findRoutesByDefinition_Origin_LocationNear(Point point, Distance distance);
 
 }

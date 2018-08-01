@@ -2,6 +2,7 @@ package be.kdg.ip2.carpooling.service.route;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
+import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.repository.RouteRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,14 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
+    public Route addRoute(RouteDto routeDto) throws RouteServiceException {
+        log.info(routeDto.toString());
+        Route route = new Route(routeDto);
+        log.info(route.toString());
+        return saveWithCheck(route,false);
+    }
+
+    @Override
     public void deleteAll() {
         routeRepository.deleteAll();
     }
@@ -59,8 +68,8 @@ public class RouteServiceImpl implements RouteService {
             routeToSave = foundRoute;
             log.info("ROUTE TO UPDATE 3: " + routeToSave);
         } else {
-            foundRoute = routeRepository.findRouteByDefinition_StartAndDefinition_Finish(route.getDefinition().getStart(),
-                    route.getDefinition().getFinish());
+            foundRoute = routeRepository.findRouteByDefinition_OriginAndDefinition_Destination(route.getDefinition().getOrigin(),
+                    route.getDefinition().getDestination());
             if (foundRoute != null) {
                 route.setId(foundRoute.getId());
             }
@@ -77,11 +86,11 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public Route findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(String startLocationName, String finishLocationName) throws RouteServiceException {
-        return routeRepository.findRouteByDefinition_Start_LocationNameAndDefinition_Finish_LocationName(startLocationName, finishLocationName);
+        return routeRepository.findRouteByDefinition_Origin_LocationNameAndDefinition_Destination_LocationName(startLocationName, finishLocationName);
     }
 
     @Override
     public List<Route> findRoutesByDefinition_Start_LocationNear(Point point, Distance distance) throws RouteServiceException {
-        return routeRepository.findRoutesByDefinition_Start_LocationNear(point, distance);
+        return routeRepository.findRoutesByDefinition_Origin_LocationNear(point, distance);
     }
 }

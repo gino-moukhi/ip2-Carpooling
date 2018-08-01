@@ -11,15 +11,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteDefinition {
-    private RouteLocation start;
-    private RouteLocation finish;
-    private RouteType type;
+    private RouteLocation origin;
+    private RouteLocation destination;
+    private RouteType routeType;
     private List<RouteLocation> waypoints;
 
-    public RouteDefinition(RouteLocation start, RouteLocation finish, RouteType type) {
-        this.start = start;
-        this.finish = finish;
-        this.type = type;
+    public RouteDefinition(RouteLocation origin, RouteLocation destination, RouteType type) {
+        this.origin = origin;
+        this.destination = destination;
+        this.routeType = type;
         waypoints = new ArrayList<>();
     }
 }
