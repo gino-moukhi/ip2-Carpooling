@@ -2,7 +2,7 @@ package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.QUser;
 import be.kdg.ip2.carpooling.domain.user.User;
-import be.kdg.ip2.carpooling.repository.UserRepository;
+import be.kdg.ip2.carpooling.repository.user.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(User user) throws UserServiceException {
-        /*User foundUser = userRepository.findUserById(user.getId());
-        if (!foundUser.getEmail().equals(user.getEmail()) && !user.getEmail().isEmpty()) {
-            foundUser.setEmail(user.getEmail());
-        }*/
-        //return null;
         return saveWithCheck(user, true);
-        //return userRepository.save(user);
     }
 
     @Override

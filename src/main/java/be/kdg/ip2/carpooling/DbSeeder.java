@@ -1,10 +1,8 @@
 package be.kdg.ip2.carpooling;
 
-import be.kdg.ip2.carpooling.domain.route.Route;
-import be.kdg.ip2.carpooling.domain.route.RouteDefinition;
-import be.kdg.ip2.carpooling.domain.route.RouteLocation;
-import be.kdg.ip2.carpooling.domain.route.RouteType;
+import be.kdg.ip2.carpooling.domain.route.*;
 import be.kdg.ip2.carpooling.domain.user.*;
+import be.kdg.ip2.carpooling.service.route.PlaceService;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 import be.kdg.ip2.carpooling.service.user.UserService;
@@ -16,24 +14,27 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 @Slf4j
 public class DbSeeder implements CommandLineRunner {
     private UserService userService;
     private RouteService routeService;
+    private PlaceService placeService;
 
     @Autowired
-    public DbSeeder(UserService userService, RouteService routeService) {
+    public DbSeeder(UserService userService, RouteService routeService, PlaceService placeService) {
         this.userService = userService;
         this.routeService = routeService;
+        this.placeService = placeService;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        //clearUsers();
+        //clearRoutes();
+        //clearPlaces();
         createUsers();
         createRoutes();
     }
@@ -57,8 +58,6 @@ public class DbSeeder implements CommandLineRunner {
                 27, Gender.FEMALE, true,
                 new Vehicle("Toyota", VehicleType.HATCHBACK, 5.1, 3));
 
-        // DELETE
-        //userService.deleteAll();
         // INSERT OR UPDATE (depends on the fact that the users exists in the collection or not)
         List<User> users = Arrays.asList(gino, jimmy, sophie);
         users.forEach(user -> {
@@ -68,6 +67,10 @@ public class DbSeeder implements CommandLineRunner {
                 log.error("Something went wrong when calling the SaveWithCheck function in the userService " + e);
             }
         });
+    }
+
+    private void clearUsers() {
+        userService.deleteAll();
     }
 
     private void createRoutes() {
@@ -105,10 +108,6 @@ public class DbSeeder implements CommandLineRunner {
                 timestamp,
                 4
         );
-
-        //DELETE
-        //routeService.deleteAll();
-
         List<Route> routes = Arrays.asList(route1, route2);
         routes.forEach(route -> {
             try {
@@ -117,5 +116,13 @@ public class DbSeeder implements CommandLineRunner {
                 log.error("Something went wrong when calling the addRoute function in the routeService " + e);
             }
         });
+    }
+
+    private void clearRoutes() {
+        routeService.deleteAll();
+    }
+
+    private void clearPlaces() {
+        placeService.deleteAll();
     }
 }

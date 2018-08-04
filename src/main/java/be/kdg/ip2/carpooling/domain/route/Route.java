@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Route {
+public class Route implements Comparable<Route> {
     @Id
     private String id;
     private RouteDefinition definition;
@@ -35,8 +35,9 @@ public class Route {
 
     public Route(RouteDto routeDto) {
         //this.definition = routeDto.getRouteDefinition();
-        this.definition = new RouteDefinition(new RouteLocation(), new RouteLocation(), routeDto.getRouteDefinition().getRouteType(), new ArrayList<>());
+        this.definition = new RouteDefinition(new RouteLocation(), new RouteLocation(), null, new ArrayList<>());
 
+        this.id = routeDto.getId();
         this.definition.setRouteType(routeDto.getRouteDefinition().getRouteType());
         this.definition.setOrigin(new RouteLocation(routeDto.getRouteDefinition().getOrigin().getName(),
                 new GeoJsonPoint(routeDto.getRouteDefinition().getOrigin().getLat(),
@@ -45,13 +46,34 @@ public class Route {
                 new GeoJsonPoint(routeDto.getRouteDefinition().getDestination().getLat(),
                         routeDto.getRouteDefinition().getDestination().getLng())));
 
-        routeDto.getRouteDefinition().getWaypoints().forEach(wp -> {
-            this.definition.getWaypoints().add(new RouteLocation(wp.getName(), new GeoJsonPoint(wp.getLat(), wp.getLng())));
-        });
+        routeDto.getRouteDefinition().getWaypoints().forEach(wp ->
+                this.definition.getWaypoints().add(new RouteLocation(wp.getName(), new GeoJsonPoint(wp.getLat(), wp.getLng()))));
 
         this.vehicleType = routeDto.getVehicleType();
         this.departure = routeDto.getDeparture();
         this.availablePassengers = routeDto.getAvailablePassengers();
 
+    }
+
+    @Override
+    public int compareTo(Route r) {
+        int i;
+        if (id == null && r.getId() == null) {
+            i = 0;
+        } else if (id.isEmpty() && r.getId().isEmpty()){
+            i = 0;
+        } else {
+            i = id.compareTo(r.id);
+        }
+        if (i != 0) return i;
+        i = definition.compareTo(r.getDefinition());
+        if (i != 0) return i;
+        i = vehicleType.equals(r.getVehicleType()) ? 0 : -1;
+        if (i != 0) return i;
+        i = departure.compareTo(r.departure);
+        if (i != 0) return -1;
+        i = Integer.compare(availablePassengers, r.getAvailablePassengers());
+        if (i != 0) return i;
+        return i;
     }
 }

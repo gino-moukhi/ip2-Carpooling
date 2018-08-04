@@ -4,7 +4,7 @@ import be.kdg.ip2.carpooling.domain.user.Address;
 import be.kdg.ip2.carpooling.domain.user.User;
 import be.kdg.ip2.carpooling.domain.user.Vehicle;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
-import be.kdg.ip2.carpooling.repository.UserRepository;
+import be.kdg.ip2.carpooling.repository.user.UserRepository;
 //import lombok.extern.slf4j.Slf4j;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
