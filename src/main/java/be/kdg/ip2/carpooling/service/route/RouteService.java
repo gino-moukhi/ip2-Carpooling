@@ -18,17 +18,19 @@ public interface RouteService {
 
     List<RouteDto> findAllRoutesAsDto() throws RouteServiceException;
 
-    Route findRouteById(String id) throws RouteServiceException;
+    RouteDto findRouteById(String id) throws RouteServiceException;
 
     Route addRoute(Route route) throws RouteServiceException;
 
     Route addRoute(RouteDto routeDto) throws RouteServiceException;
 
+    Route updateRoute(RouteDto routeDto) throws RouteServiceException;
+
     void deleteAll();
 
     void deleteRouteById(String id);
 
-    Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException;
+    //Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException;
 
     List<Route> findRoutesByVehicleType(VehicleType type) throws RouteServiceException;
 
@@ -39,5 +41,5 @@ public interface RouteService {
 
     List<Route> findRoutesByDefinition_Origin_LocationNear(Point point, Distance distance) throws RouteServiceException;
 
-    Set<Route> findRoutesNearLocations(Point origin, Point destination, Distance distance);
+    List<RouteDto> findRoutesNearLocations(Point origin, Point destination, Distance distance);
 }

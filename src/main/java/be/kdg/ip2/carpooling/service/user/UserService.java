@@ -1,6 +1,7 @@
 package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.User;
+import be.kdg.ip2.carpooling.dto.UserDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,19 +10,23 @@ import java.util.List;
 public interface UserService {
     User findUserById(String id) throws UserServiceException;
 
+    UserDto findUserDtoById(String id) throws UserServiceException;
+
     User findUserByEmail(String email) throws UserServiceException;
 
-    List<User> findAllUsers();
+    List<UserDto> findAllUsers();
+
+    User addUser(UserDto user) throws UserServiceException;
 
     User addUser(User user) throws UserServiceException;
+
+    User updateUser(UserDto user) throws UserServiceException;
 
     User updateUser(User user) throws UserServiceException;
 
     void deleteUser(String id) throws UserServiceException;
 
     void deleteAll();
-
-    User saveWithCheck(User user, boolean useIdOrEmail) throws UserServiceException;
 
     List<User> findUserByAgelessThan(int max) throws UserServiceException;
 

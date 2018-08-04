@@ -17,10 +17,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
@@ -112,7 +110,7 @@ public class RouteRepoTest {
 
     @Test
     public void testAddRoute() {
-        /*List<RouteLocation> waypointsForRoute1 = new ArrayList<>();
+        List<RouteLocation> waypointsForRoute1 = new ArrayList<>();
         //waypointsForRoute1.add(new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580));
         waypointsForRoute1.add(new RouteLocation("Brugstraat 103, Brecht", new GeoJsonPoint(51.297413, 4.573580)));
         LocalDateTime timestamp = LocalDateTime.now();
@@ -129,12 +127,12 @@ public class RouteRepoTest {
                 3);
 
         List<Route> allRoutes = repo.findAll();
-        assertThat(allRoutes.size(), equalTo(2));
+        assertThat(allRoutes.size(), equalTo(3));
         assertNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));
         repo.insert(route1);
         allRoutes = repo.findAll();
-        assertThat(allRoutes.size(), equalTo(3));
-        assertNotNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));*/
+        assertThat(allRoutes.size(), equalTo(4));
+        assertNotNull(repo.findRouteByDefinition_OriginAndDefinition_Destination(route1.getDefinition().getOrigin(), route1.getDefinition().getDestination()));
     }
 
     @Test

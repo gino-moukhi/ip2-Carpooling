@@ -62,7 +62,7 @@ public class DbSeeder implements CommandLineRunner {
         List<User> users = Arrays.asList(gino, jimmy, sophie);
         users.forEach(user -> {
             try {
-                userService.saveWithCheck(user, false);
+                userService.addUser(user);
             } catch (UserServiceException e) {
                 log.error("Something went wrong when calling the SaveWithCheck function in the userService " + e);
             }
@@ -95,7 +95,7 @@ public class DbSeeder implements CommandLineRunner {
         waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", new GeoJsonPoint(51.297413, 4.573580)));
         //waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248));
         waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", new GeoJsonPoint(51.253799, 4.495248)));
-        timestamp = LocalDateTime.of(2018,7,28,18,0);
+        timestamp = LocalDateTime.of(2018, 7, 28, 18, 0);
 
         Route route2 = new Route(new RouteDefinition(
                 //new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821),
@@ -111,7 +111,7 @@ public class DbSeeder implements CommandLineRunner {
         List<Route> routes = Arrays.asList(route1, route2);
         routes.forEach(route -> {
             try {
-                routeService.saveWithCheck(route,false);
+                routeService.addRoute(route);
             } catch (RouteServiceException e) {
                 log.error("Something went wrong when calling the addRoute function in the routeService " + e);
             }

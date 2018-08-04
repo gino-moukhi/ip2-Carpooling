@@ -35,26 +35,18 @@ public class RouteServiceImpl implements RouteService {
     public List<RouteDto> findAllRoutesAsDto() throws RouteServiceException {
         List<Route> all = routeRepository.findAll();
         List<RouteDto> allDto = new ArrayList<>();
-
-        all.forEach(route -> {
-            RouteDto routeDto = new RouteDto(route);
-            allDto.add(routeDto);
-        });
-        log.info("ALL");
-        log.info(all.toString());
-        log.info("ALL DTO");
-        log.info(allDto.toString());
+        all.forEach(route -> allDto.add(new RouteDto(route)));
         return allDto;
     }
 
     @Override
-    public Route findRouteById(String id) throws RouteServiceException {
-        return routeRepository.findRouteById(id);
+    public RouteDto findRouteById(String id) throws RouteServiceException {
+        return new RouteDto(routeRepository.findRouteById(id));
     }
 
     @Override
     public Route addRoute(Route route) throws RouteServiceException {
-        return routeRepository.save(route);
+        return saveWithCheck(route, false);
     }
 
     @Override
@@ -66,6 +58,12 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
+    public Route updateRoute(RouteDto routeDto) throws RouteServiceException {
+        Route route = new Route(routeDto);
+        return saveWithCheck(route, true);
+    }
+
+    @Override
     public void deleteAll() {
         routeRepository.deleteAll();
     }
@@ -73,29 +71,6 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public void deleteRouteById(String id) {
         routeRepository.deleteById(id);
-    }
-
-    @Override
-    public Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException {
-        Route foundRoute;
-        Route routeToSave;
-        log.info("ROUTE TO UPDATE 1: " + route);
-        if (useIdOrRouteDefinition) {
-            foundRoute = routeRepository.findRouteById(route.getId());
-            log.info("ROUTE TO UPDATE 2: " + foundRoute);
-            foundRoute = route;
-            routeToSave = foundRoute;
-            log.info("ROUTE TO UPDATE 3: " + routeToSave);
-        } else {
-            foundRoute = routeRepository.findRouteByDefinition_OriginAndDefinition_Destination(route.getDefinition().getOrigin(),
-                    route.getDefinition().getDestination());
-            if (foundRoute != null) {
-                route.setId(foundRoute.getId());
-            }
-            routeToSave = route;
-            log.info("THE NEW ROUTE TO SAVE: " + routeToSave);
-        }
-        return routeRepository.save(routeToSave);
     }
 
     @Override
@@ -121,7 +96,7 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public Set<Route> findRoutesNearLocations(Point origin, Point destination, Distance distance) {
+    public List<RouteDto> findRoutesNearLocations(Point origin, Point destination, Distance distance) {
         List<Place> allPlacesNearOrigin;
         List<Place> allPlacesNearDestination;
         List<Route> allRoutes = routeRepository.findAll();
@@ -159,6 +134,25 @@ public class RouteServiceImpl implements RouteService {
 
         }
         log.info(matchingRoutesSet.toString());
-        return !matchingRoutesSet.isEmpty() ? matchingRoutesSet : null;
+        List<RouteDto> routeDtos = new ArrayList<>();
+        matchingRoutesSet.forEach(route -> routeDtos.add(new RouteDto(route)));
+        return !routeDtos.isEmpty() ? routeDtos : null;
+    }
+
+    //@Override
+    private Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException {
+        Route foundRoute;
+        Route routeToSave;
+        if (useIdOrRouteDefinition) {
+            routeToSave = route;
+        } else {
+            foundRoute = routeRepository.findRouteByDefinition_OriginAndDefinition_Destination(route.getDefinition().getOrigin(),
+                    route.getDefinition().getDestination());
+            if (foundRoute != null) {
+                route.setId(foundRoute.getId());
+            }
+            routeToSave = route;
+        }
+        return routeRepository.save(routeToSave);
     }
 }

@@ -22,17 +22,17 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public List<User> getAll() {
+    public List<UserDto> getAll() {
         return userService.findAllUsers();
     }
 
     @PostMapping
-    public User insert(@RequestBody User user) throws UserServiceException {
+    public User insert(@RequestBody UserDto user) throws UserServiceException {
         return userService.addUser(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User user) throws UserServiceException {
+    public User update(@RequestBody UserDto user) throws UserServiceException {
         return userService.updateUser(user);
     }
 
@@ -46,10 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable("id")String id) throws UserServiceException {
-        return userService.findUserById(id);
+    public UserDto getById(@PathVariable("id")String id) throws UserServiceException {
+        return userService.findUserDtoById(id);
     }
 
+    // ALL FOLOWING METHODS ARE NOT USED, THEY ARE JUST AN EXAMPLE
     @GetMapping("/age/{age}")
     public List<User> getByMaxAge(@PathVariable("age")int max) {
         List<User> foundUsers = new ArrayList<>();

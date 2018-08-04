@@ -26,11 +26,6 @@ public class User {
     private boolean smoker;
     private Vehicle vehicle;
 
-    public User(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
     public User(String email, String password, Name name, Address address, int age, Gender gender, boolean smoker, Vehicle vehicle) {
         this.email = email;
         this.password = password;
@@ -43,6 +38,7 @@ public class User {
     }
 
     public User(UserDto userDto) {
+        this.id = userDto.getId();
         this.email = userDto.getEmail();
         this.password = userDto.getPassword();
         this.name = userDto.getName();
