@@ -2,6 +2,8 @@ package be.kdg.ip2.carpooling.domain.route;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import be.kdg.ip2.carpooling.domain.place.Place;
+import be.kdg.ip2.carpooling.domain.place.SourceType;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.PathMetadata;

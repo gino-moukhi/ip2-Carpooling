@@ -20,13 +20,13 @@ public class QRouteDefinition extends BeanPath<RouteDefinition> {
 
     public static final QRouteDefinition routeDefinition = new QRouteDefinition("routeDefinition");
 
-    public final SimplePath<RouteLocation> destination = createSimple("destination", RouteLocation.class);
+    public final ComparablePath<RouteLocation> destination = createComparable("destination", RouteLocation.class);
 
-    public final SimplePath<RouteLocation> origin = createSimple("origin", RouteLocation.class);
+    public final ComparablePath<RouteLocation> origin = createComparable("origin", RouteLocation.class);
 
     public final EnumPath<RouteType> routeType = createEnum("routeType", RouteType.class);
 
-    public final ListPath<RouteLocation, SimplePath<RouteLocation>> waypoints = this.<RouteLocation, SimplePath<RouteLocation>>createList("waypoints", RouteLocation.class, SimplePath.class, PathInits.DIRECT2);
+    public final ListPath<RouteLocation, ComparablePath<RouteLocation>> waypoints = this.<RouteLocation, ComparablePath<RouteLocation>>createList("waypoints", RouteLocation.class, ComparablePath.class, PathInits.DIRECT2);
 
     public QRouteDefinition(String variable) {
         super(RouteDefinition.class, forVariable(variable));

@@ -22,9 +22,9 @@ public interface RouteRepository extends MongoRepository<Route, String>, Queryds
 
     Route findRouteByDefinition_Origin_LocationNameAndDefinition_Destination_LocationName(String startLocationName, String finishLocationName);
 
-    List<Route> findRouteByDefinition_Origin_LocationNameAndDefinition_Origin_LocationNear(String locationName, GeoJsonPoint point);
+    List<Route> findRouteByDefinition_Origin_LocationNameAndDefinition_Origin_LocationNear(String locationName, Point point);
 
-    List<Route> findRoutesByDefinition_Origin_LocationAndDefinition_Destination_Location(GeoJsonPoint origin, GeoJsonPoint destination);
+    List<Route> findRoutesByDefinition_Origin_LocationAndDefinition_Destination_Location(Point origin, Point destination);
 
     List<Route> findRoutesByDefinition_Origin_LocationNear(Point point, Distance distance);
 

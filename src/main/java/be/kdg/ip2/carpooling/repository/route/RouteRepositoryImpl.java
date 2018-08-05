@@ -1,7 +1,7 @@
 package be.kdg.ip2.carpooling.repository.route;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
-import be.kdg.ip2.carpooling.domain.route.SourceType;
+import be.kdg.ip2.carpooling.domain.place.SourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -27,8 +27,8 @@ public class RouteRepositoryImpl implements CustomRouteRepository {
     public List<Route> findExistingRoutesFromPlaces(SourceType sourceType1, SourceType sourceType2, Point origin, Point destination) {
         Query query = new Query();
         if (sourceType1.equals(SourceType.WAYPOINT) && sourceType2.equals(SourceType.WAYPOINT)) {
-            query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(new GeoJsonPoint(origin)))
-                    .elemMatch(Criteria.where("location").is(new GeoJsonPoint(destination))));
+            query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(origin))
+                    .elemMatch(Criteria.where("location").is(destination)));
         } else {
             CriteriaGeneratorFromSourceType(sourceType1, origin, query);
             CriteriaGeneratorFromSourceType(sourceType2, destination, query);
@@ -39,13 +39,13 @@ public class RouteRepositoryImpl implements CustomRouteRepository {
     private void CriteriaGeneratorFromSourceType(SourceType sourceType, Point point, Query query) {
         switch (sourceType) {
             case ORIGIN:
-                query.addCriteria(Criteria.where("definition.origin.location").is(new GeoJsonPoint(point)));
+                query.addCriteria(Criteria.where("definition.origin.location").is(point));
                 break;
             case DESTINATION:
-                query.addCriteria(Criteria.where("definition.destination.location").is(new GeoJsonPoint(point)));
+                query.addCriteria(Criteria.where("definition.destination.location").is(point));
                 break;
             case WAYPOINT:
-                query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(new GeoJsonPoint(point))));
+                query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(point)));
                 break;
         }
     }

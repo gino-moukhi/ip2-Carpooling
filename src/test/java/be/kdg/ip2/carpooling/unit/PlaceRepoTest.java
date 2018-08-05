@@ -1,7 +1,7 @@
 package be.kdg.ip2.carpooling.unit;
 
-import be.kdg.ip2.carpooling.domain.route.Place;
-import be.kdg.ip2.carpooling.domain.route.SourceType;
+import be.kdg.ip2.carpooling.domain.place.Place;
+import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -40,14 +41,14 @@ public class Route implements Comparable<Route> {
         this.id = routeDto.getId();
         this.definition.setRouteType(routeDto.getRouteDefinition().getRouteType());
         this.definition.setOrigin(new RouteLocation(routeDto.getRouteDefinition().getOrigin().getName(),
-                new GeoJsonPoint(routeDto.getRouteDefinition().getOrigin().getLat(),
+                new Point(routeDto.getRouteDefinition().getOrigin().getLat(),
                         routeDto.getRouteDefinition().getOrigin().getLng())));
         this.definition.setDestination(new RouteLocation(routeDto.getRouteDefinition().getDestination().getName(),
-                new GeoJsonPoint(routeDto.getRouteDefinition().getDestination().getLat(),
+                new Point(routeDto.getRouteDefinition().getDestination().getLat(),
                         routeDto.getRouteDefinition().getDestination().getLng())));
 
         routeDto.getRouteDefinition().getWaypoints().forEach(wp ->
-                this.definition.getWaypoints().add(new RouteLocation(wp.getName(), new GeoJsonPoint(wp.getLat(), wp.getLng()))));
+                this.definition.getWaypoints().add(new RouteLocation(wp.getName(), new Point(wp.getLat(), wp.getLng()))));
 
         this.vehicleType = routeDto.getVehicleType();
         this.departure = routeDto.getDeparture();

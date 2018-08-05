@@ -1,12 +1,14 @@
 package be.kdg.ip2.carpooling.service.route;
 
+import be.kdg.ip2.carpooling.domain.place.Place;
+import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.domain.route.*;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
-import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
+import be.kdg.ip2.carpooling.util.DecimalUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -50,21 +51,24 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public Route addRoute(Route route) throws RouteServiceException {
-        return saveWithCheck(route, false);
+        Route rounded = DecimalUtil.roundLocationPoints(route);
+        return saveWithCheck(rounded, false);
     }
 
     @Override
     public Route addRoute(RouteDto routeDto) throws RouteServiceException {
         log.info(routeDto.toString());
         Route route = new Route(routeDto);
+        Route rounded = DecimalUtil.roundLocationPoints(route);
         log.info(route.toString());
-        return saveWithCheck(route, false);
+        return saveWithCheck(rounded, false);
     }
 
     @Override
     public Route updateRoute(RouteDto routeDto) throws RouteServiceException {
         Route route = new Route(routeDto);
-        return saveWithCheck(route, true);
+        Route rounded = DecimalUtil.roundLocationPoints(route);
+        return saveWithCheck(rounded, true);
     }
 
     @Override
@@ -89,8 +93,8 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public List<Route> findRoutesByDefinition_Origin_LocationAndDefinition_Destination_Location(double originLat, double originLng, double destinationLat, double destinationLng) {
-        GeoJsonPoint origin = new GeoJsonPoint(originLat, originLng);
-        GeoJsonPoint destination = new GeoJsonPoint(destinationLat, destinationLng);
+        Point origin = new Point(originLat, originLng);
+        Point destination = new Point(destinationLat, destinationLng);
         return routeRepository.findRoutesByDefinition_Origin_LocationAndDefinition_Destination_Location(origin, destination);
     }
 
@@ -101,25 +105,27 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public List<RouteDto> findRoutesNearLocationsSimple(SearchCriteria searchCriteria) {
-        /*QRoute qRoute = new QRoute("route");
-        BooleanExpression filterByAvailabePassengers = qRoute.availablePassengers.ne(0);
-        List<Route> allRoutes = (List<Route>) routeRepository.findAll(filterByAvailabePassengers);*/
-        List<Route> allRoutes = routeRepository.findAll();
+        QRoute qRoute = new QRoute("route");
+        BooleanExpression filterByAvailabePassengers = qRoute.availablePassengers.gt(0);
+        List<Route> allRoutes = (List<Route>) routeRepository.findAll(filterByAvailabePassengers);
+        //List<Route> allRoundedRoutes = new ArrayList<>();
+        //allRoutes.forEach(route -> allRoundedRoutes.add(DecimalUtil.roundLocationPoints(route)));
         List<Place> allPlacesNearOrigin;
         List<Place> allPlacesNearDestination;
-        Set<Place> places = new TreeSet<>(new PlaceLocationComparator());
+        Set<Place> places = new TreeSet<>();
 
+        //allRoundedRoutes.forEach(route -> {
         allRoutes.forEach(route -> {
             places.add(new Place(route.getDefinition().getOrigin().getLocationName(),
-                    route.getDefinition().getOrigin().getLocation(), SourceType.ORIGIN));
+                    new GeoJsonPoint(route.getDefinition().getOrigin().getLocation()), SourceType.ORIGIN));
             places.add(new Place(route.getDefinition().getDestination().getLocationName(),
-                    route.getDefinition().getDestination().getLocation(), SourceType.DESTINATION));
+                    new GeoJsonPoint(route.getDefinition().getDestination().getLocation()), SourceType.DESTINATION));
             route.getDefinition().getWaypoints().forEach(wp ->
-                    places.add(new Place(wp.getLocationName(), wp.getLocation(), SourceType.WAYPOINT)));
+                    places.add(new Place(wp.getLocationName(), new GeoJsonPoint(wp.getLocation()), SourceType.WAYPOINT)));
         });
 
         places.forEach(place -> {
-            if (placeRepository.findPlaceByLocation(place.getLocation()) == null) {
+            if (placeRepository.findPlaceByLocationAndSourceType(place.getLocation(), place.getSourceType()) == null) {
                 placeRepository.save(place);
             }
         });
@@ -134,7 +140,7 @@ public class RouteServiceImpl implements RouteService {
             allPlacesNearOrigin.forEach(originPlace ->
                     allPlacesNearDestination.forEach(destinationPlace -> {
                         List<Route> existingRoutesFromPlaces = routeRepository.findExistingRoutesFromPlaces(originPlace.getSourceType(),
-                                destinationPlace.getSourceType(), originPlace.getLocation(), destinationPlace.getLocation());
+                                destinationPlace.getSourceType(), new Point(originPlace.getLocation()), new Point(destinationPlace.getLocation()));
 
                         matchingRoutesSet.addAll(existingRoutesFromPlaces);
                     }));
@@ -151,7 +157,6 @@ public class RouteServiceImpl implements RouteService {
         return null;
     }
 
-    //@Override
     private Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException {
         Route foundRoute;
         Route routeToSave;
