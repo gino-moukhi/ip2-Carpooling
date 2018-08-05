@@ -1,10 +1,13 @@
 package be.kdg.ip2.carpooling.service.route;
 
 import be.kdg.ip2.carpooling.domain.route.*;
+import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
+import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
-import be.kdg.ip2.carpooling.repository.PlaceRepository;
+import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
@@ -12,6 +15,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -96,11 +100,15 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public List<RouteDto> findRoutesNearLocations(Point origin, Point destination, Distance distance) {
+    public List<RouteDto> findRoutesNearLocationsSimple(SearchCriteria searchCriteria) {
+        /*QRoute qRoute = new QRoute("route");
+        BooleanExpression filterByAvailabePassengers = qRoute.availablePassengers.ne(0);
+        List<Route> allRoutes = (List<Route>) routeRepository.findAll(filterByAvailabePassengers);*/
+        List<Route> allRoutes = routeRepository.findAll();
         List<Place> allPlacesNearOrigin;
         List<Place> allPlacesNearDestination;
-        List<Route> allRoutes = routeRepository.findAll();
         Set<Place> places = new TreeSet<>(new PlaceLocationComparator());
+
         allRoutes.forEach(route -> {
             places.add(new Place(route.getDefinition().getOrigin().getLocationName(),
                     route.getDefinition().getOrigin().getLocation(), SourceType.ORIGIN));
@@ -108,7 +116,6 @@ public class RouteServiceImpl implements RouteService {
                     route.getDefinition().getDestination().getLocation(), SourceType.DESTINATION));
             route.getDefinition().getWaypoints().forEach(wp ->
                     places.add(new Place(wp.getLocationName(), wp.getLocation(), SourceType.WAYPOINT)));
-
         });
 
         places.forEach(place -> {
@@ -116,8 +123,8 @@ public class RouteServiceImpl implements RouteService {
                 placeRepository.save(place);
             }
         });
-        allPlacesNearOrigin = placeRepository.findPlacesByLocationNear(origin, distance);
-        allPlacesNearDestination = placeRepository.findPlacesByLocationNear(destination, distance);
+        allPlacesNearOrigin = placeRepository.findPlacesByLocationNear(searchCriteria.getOrigin(), searchCriteria.getDistance());
+        allPlacesNearDestination = placeRepository.findPlacesByLocationNear(searchCriteria.getDestination(), searchCriteria.getDistance());
         allPlacesNearOrigin.removeIf(place -> place.getSourceType().equals(SourceType.DESTINATION));
         allPlacesNearDestination.removeIf(place -> place.getSourceType().equals(SourceType.ORIGIN));
         Set<Route> matchingRoutesSet = new TreeSet<>();
@@ -137,6 +144,11 @@ public class RouteServiceImpl implements RouteService {
         List<RouteDto> routeDtos = new ArrayList<>();
         matchingRoutesSet.forEach(route -> routeDtos.add(new RouteDto(route)));
         return !routeDtos.isEmpty() ? routeDtos : null;
+    }
+
+    @Override
+    public List<RouteDto> findRoutesNearLocationsAdvanced(SearchCriteria searchCriteria) {
+        return null;
     }
 
     //@Override

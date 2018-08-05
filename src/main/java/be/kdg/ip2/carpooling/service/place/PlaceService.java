@@ -1,4 +1,4 @@
-package be.kdg.ip2.carpooling.service.route;
+package be.kdg.ip2.carpooling.service.place;
 
 import be.kdg.ip2.carpooling.domain.route.Place;
 import org.springframework.data.geo.Distance;

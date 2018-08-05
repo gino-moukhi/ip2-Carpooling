@@ -1,6 +1,8 @@
 package be.kdg.ip2.carpooling.service.route;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
+import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
+import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import org.springframework.data.geo.Distance;
@@ -9,6 +11,7 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 //import com.mongodb.client.model.geojson.Point;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -41,5 +44,7 @@ public interface RouteService {
 
     List<Route> findRoutesByDefinition_Origin_LocationNear(Point point, Distance distance) throws RouteServiceException;
 
-    List<RouteDto> findRoutesNearLocations(Point origin, Point destination, Distance distance);
+    List<RouteDto> findRoutesNearLocationsSimple(SearchCriteria searchCriteria);
+
+    List<RouteDto> findRoutesNearLocationsAdvanced(SearchCriteria searchCriteria);
 }

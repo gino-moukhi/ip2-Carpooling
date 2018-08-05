@@ -2,7 +2,7 @@ package be.kdg.ip2.carpooling;
 
 import be.kdg.ip2.carpooling.domain.route.*;
 import be.kdg.ip2.carpooling.domain.user.*;
-import be.kdg.ip2.carpooling.service.route.PlaceService;
+import be.kdg.ip2.carpooling.service.place.PlaceService;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 import be.kdg.ip2.carpooling.service.user.UserService;
@@ -35,8 +35,8 @@ public class DbSeeder implements CommandLineRunner {
         //clearUsers();
         //clearRoutes();
         //clearPlaces();
-        createUsers();
-        createRoutes();
+        //createUsers();
+        //createRoutes();
     }
 
     private void createUsers() {

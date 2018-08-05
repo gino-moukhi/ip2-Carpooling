@@ -1,7 +1,7 @@
-package be.kdg.ip2.carpooling.service.route;
+package be.kdg.ip2.carpooling.service.place;
 
 import be.kdg.ip2.carpooling.domain.route.Place;
-import be.kdg.ip2.carpooling.repository.PlaceRepository;
+import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
