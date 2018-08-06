@@ -43,18 +43,18 @@ public class RouteRepoTest {
         Point wilgendaal = new Point(51.253799, 4.495248);
         Point churchillaan = new Point(51.249904, 4.487033);
         Point groenplaats = new Point(51.218962, 4.402153);
-        RouteLocation rl1 = new RouteLocation("Road1", new Point(1.5, 1.5));
-        RouteLocation rl2 = new RouteLocation("Road2", new Point(1.5, 1));
+        RouteLocation rl1 = new RouteLocation("Brugstraat 103, 2960 Brecht, België", brugstraat);
+        RouteLocation rl2 = new RouteLocation("Churchilllaan, 2900 Schoten, België", churchillaan);
         RouteLocation rl3 = new RouteLocation("Road3", new Point(1.5, 1.5));
 
         Set<RouteLocation> locations = new TreeSet<>(Arrays.asList(rl1, rl2, rl3));
         log.info(locations.toString());
 
-        Set<Route> uniqueRoutes = checkForRoutesInRepo(brugstraat, churchillaan);
+        Set<Route> uniqueRoutes = checkForRoutesInRepo(rl1, rl2);
         log.info(uniqueRoutes.toString());
     }
 
-    private Set<Route> checkForRoutesInRepo(Point origin, Point destination) {
+    private Set<Route> checkForRoutesInRepo(RouteLocation origin, RouteLocation destination) {
         List<Route> routesOriginDestination = repo.findExistingRoutesFromPlaces(SourceType.ORIGIN, SourceType.DESTINATION, origin, destination);
         List<Route> routesOriginWaypoint = repo.findExistingRoutesFromPlaces(SourceType.ORIGIN, SourceType.WAYPOINT, origin, destination);
         List<Route> routesWaypointDestination = repo.findExistingRoutesFromPlaces(SourceType.WAYPOINT, SourceType.DESTINATION, origin, destination);

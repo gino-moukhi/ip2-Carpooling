@@ -140,7 +140,8 @@ public class RouteServiceImpl implements RouteService {
             allPlacesNearOrigin.forEach(originPlace ->
                     allPlacesNearDestination.forEach(destinationPlace -> {
                         List<Route> existingRoutesFromPlaces = routeRepository.findExistingRoutesFromPlaces(originPlace.getSourceType(),
-                                destinationPlace.getSourceType(), new Point(originPlace.getLocation()), new Point(destinationPlace.getLocation()));
+                                destinationPlace.getSourceType(), new RouteLocation(originPlace.getLocationName(), new Point(originPlace.getLocation())),
+                                new RouteLocation(destinationPlace.getLocationName(), new Point(destinationPlace.getLocation())));
 
                         matchingRoutesSet.addAll(existingRoutesFromPlaces);
                     }));

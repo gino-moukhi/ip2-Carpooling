@@ -16,6 +16,14 @@ public class RouteLocation implements Comparable<RouteLocation> {
     private Point location;
 
     @Override
+    public boolean equals(Object obj) {
+        boolean equals = super.equals(obj);
+        int i = this.compareTo((RouteLocation) obj);
+        equals = i == 0;
+        return equals;
+    }
+
+    @Override
     public int compareTo(RouteLocation rl) {
         int i;
         /*i = locationName.compareTo(rl.getLocationName());
