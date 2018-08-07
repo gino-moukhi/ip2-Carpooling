@@ -4,6 +4,7 @@ import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
+import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,11 @@ public class RouteController {
         return routeService.updateRoute(route);
     }
 
+    @PutMapping("/route/passenger")
+    public Route addPassengerToRoute(@RequestParam String routeId, @RequestBody RouteUserDto routeUserDto) throws RouteServiceException {
+        return routeService.addPassengerToRoute(routeId, routeUserDto);
+    }
+
     @DeleteMapping
     public void deleteAll() {
         routeService.deleteAll();
@@ -78,6 +84,11 @@ public class RouteController {
         Distance distance = new Distance(d, Metrics.KILOMETERS);
         return routeService.findRoutesNearLocationsSimple(origin, destination, distance);
     }*/
+
+    @GetMapping("/myRoutes")
+    public List<RouteDto> getRoutesOfUser(@RequestParam String userId) {
+        return routeService.findRoutesWhereUserIsOwnerOrPassenger(userId);
+    }
 
     @GetMapping("/location/near/simple")
     public List<RouteDto> getRoutesNearLocationsSimple(@RequestParam String originLat, @RequestParam String originLng,
@@ -119,9 +130,9 @@ public class RouteController {
     private SearchCriteriaAcceptanceType acceptanceTypeAssigner(int data) {
         switch (data) {
             case 0:
-                return SearchCriteriaAcceptanceType.YES;
+                return SearchCriteriaAcceptanceType.OPTION1;
             case 1:
-                return SearchCriteriaAcceptanceType.NO;
+                return SearchCriteriaAcceptanceType.OPTION2;
             default:
                 return SearchCriteriaAcceptanceType.EITHER;
         }

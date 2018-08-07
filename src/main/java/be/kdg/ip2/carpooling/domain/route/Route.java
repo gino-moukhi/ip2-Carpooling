@@ -1,5 +1,6 @@
 package be.kdg.ip2.carpooling.domain.route;
 
+import be.kdg.ip2.carpooling.domain.user.RouteUser;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import lombok.Getter;
@@ -8,11 +9,11 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "routes")
 @Getter
@@ -26,16 +27,28 @@ public class Route implements Comparable<Route> {
     private VehicleType vehicleType;
     private LocalDateTime departure;
     private int availablePassengers;
+    private RouteUser owner;
+    private List<RouteUser> passengers;
 
-    public Route(RouteDefinition definition, VehicleType vehicleType, LocalDateTime departure, int availablePassengers) {
+    public Route(RouteDefinition definition, LocalDateTime departure, int availablePassengers, RouteUser owner, List<RouteUser> passengers) {
         this.definition = definition;
-        this.vehicleType = vehicleType;
+        this.vehicleType = owner.getVehicle().getType();
         this.departure = departure;
         this.availablePassengers = availablePassengers;
+        this.owner = owner;
+        this.passengers = passengers;
+    }
+
+    public Route(RouteDefinition definition, LocalDateTime departure, int availablePassengers, RouteUser owner) {
+        this.definition = definition;
+        this.vehicleType = owner.getVehicle().getType();
+        this.departure = departure;
+        this.availablePassengers = availablePassengers;
+        this.owner = owner;
+        this.passengers = new ArrayList<>();
     }
 
     public Route(RouteDto routeDto) {
-        //this.definition = routeDto.getRouteDefinition();
         this.definition = new RouteDefinition(new RouteLocation(), new RouteLocation(), null, new ArrayList<>());
 
         this.id = routeDto.getId();
@@ -53,7 +66,12 @@ public class Route implements Comparable<Route> {
         this.vehicleType = routeDto.getVehicleType();
         this.departure = routeDto.getDeparture();
         this.availablePassengers = routeDto.getAvailablePassengers();
-
+        this.owner = new RouteUser(routeDto.getOwner());
+        if (routeDto.getPassengers().isEmpty()) {
+            this.passengers = new ArrayList<>();
+        } else {
+            routeDto.getPassengers().forEach(userDto -> this.passengers.add(new RouteUser(userDto)));
+        }
     }
 
     @Override
@@ -75,6 +93,18 @@ public class Route implements Comparable<Route> {
         if (i != 0) return -1;
         i = Integer.compare(availablePassengers, r.getAvailablePassengers());
         if (i != 0) return i;
+        i = owner.compareTo(r.getOwner());
+        if (i != 0) return i;
+        if (passengers.isEmpty() && r.getPassengers().isEmpty()) {
+            return 0;
+        } else {
+            if (passengers.size() == r.getPassengers().size()) {
+                for (int j = 0; j < passengers.size(); j++) {
+                    i = passengers.get(j).compareTo(r.getPassengers().get(j));
+                    if (i != 0) return i;
+                }
+            } else return -1;
+        }
         return i;
     }
 }

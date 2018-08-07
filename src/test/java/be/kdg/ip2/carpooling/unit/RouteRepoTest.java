@@ -2,8 +2,11 @@ package be.kdg.ip2.carpooling.unit;
 
 import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.domain.route.*;
+import be.kdg.ip2.carpooling.domain.user.Gender;
+import be.kdg.ip2.carpooling.domain.user.QRouteUser;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.geo.*;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.IndexInfo;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.repository.support.SpringDataMongodbQuery;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.lang.reflect.WildcardType;
@@ -32,6 +37,8 @@ public class RouteRepoTest {
     private RouteRepository repo;
     @Autowired
     private MongoOperations mongoOperations;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Test
     public void testMongoOperations() {
@@ -43,15 +50,38 @@ public class RouteRepoTest {
         Point wilgendaal = new Point(51.253799, 4.495248);
         Point churchillaan = new Point(51.249904, 4.487033);
         Point groenplaats = new Point(51.218962, 4.402153);
+        String sophieId = "5b534318d3303d2c7090d940";
+        String ginoId = "5b534318d3303d2c7090d93e";
         RouteLocation rl1 = new RouteLocation("Brugstraat 103, 2960 Brecht, België", brugstraat);
         RouteLocation rl2 = new RouteLocation("Churchilllaan, 2900 Schoten, België", churchillaan);
-        RouteLocation rl3 = new RouteLocation("Road3", new Point(1.5, 1.5));
+        RouteLocation rl3 = new RouteLocation("Ter Heydelaan 418, 2100 Antwerpen, België", new Point(51.231351, 4.477224));
 
         Set<RouteLocation> locations = new TreeSet<>(Arrays.asList(rl1, rl2, rl3));
         log.info(locations.toString());
 
         Set<Route> uniqueRoutes = checkForRoutesInRepo(rl1, rl2);
         log.info(uniqueRoutes.toString());
+        Query query = new Query();
+        //query.addCriteria(Criteria.where("owner._id").is("5b534318d3303d2c7090d940").orOperator(Criteria.where("passengers").elemMatch(Criteria.where("_id").is("5b534318d3303d2c7090d940"))));
+        /*query.addCriteria(Criteria.where("owner._id").is("5b534318d3303d2c7090d940"));
+        query.addCriteria(Criteria.where("passengers").elemMatch(Criteria.where("_id").is("5b534318d3303d2c7090d940")));*/
+        //query.addCriteria(new Criteria().orOperator(Criteria.where("owner._id").is(ginoId), Criteria.where("passengers").elemMatch(Criteria.where("_id").is(ginoId))));
+        query.addCriteria(Criteria.where("owner.gender").is(Gender.FEMALE));
+        List<Route> foundRoutes = mongoOperations.find(query, Route.class);
+        List<Route> foundRoutes2 = new ArrayList<>();
+        QRoute qRoute = new QRoute("route");
+        BooleanExpression departureFilter = qRoute.departure.between(LocalDateTime.of(2018, 8, 6, 12, 40),
+                LocalDateTime.of(2018, 8, 6, 12, 55));
+        List<Route> allFilteredRoutes = (List<Route>) repo.findAll(departureFilter);
+        allFilteredRoutes.forEach(route -> {
+            if ((route.getDefinition().getOrigin().compareTo(rl2) == 0 ||
+                    route.getDefinition().getWaypoints().contains(rl2)) &&
+                    (route.getDefinition().getDestination().compareTo(rl3) == 0 ||
+                    route.getDefinition().getWaypoints().contains(rl3))) {
+                foundRoutes2.add(route);
+            }
+        });
+        foundRoutes2.forEach(System.out::println);
     }
 
     private Set<Route> checkForRoutesInRepo(RouteLocation origin, RouteLocation destination) {

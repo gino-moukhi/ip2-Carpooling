@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface CustomRouteRepository {
     List<Route> findExistingRoutesFromPlaces(SourceType sourceType1, SourceType sourceType2, RouteLocation origin, RouteLocation destination);
+
+    List<Route> findRoutesWhereUserIsOwnerOrPassenger(String userId);
 }

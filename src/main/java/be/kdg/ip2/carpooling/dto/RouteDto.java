@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,12 +18,16 @@ public class RouteDto {
     private VehicleType vehicleType;
     private LocalDateTime departure;
     private int availablePassengers;
+    private RouteUserDto owner;
+    private List<RouteUserDto> passengers;
 
-    public RouteDto(RouteDefinitionDto routeDefinition, VehicleType vehicleType, LocalDateTime departure, int availablePassengers) {
+    public RouteDto(RouteDefinitionDto routeDefinition, LocalDateTime departure, int availablePassengers, RouteUserDto owner, List<RouteUserDto> passengers) {
         this.routeDefinition = routeDefinition;
-        this.vehicleType = vehicleType;
+        this.vehicleType = owner.getVehicle().getType();
         this.departure = departure;
         this.availablePassengers = availablePassengers;
+        this.owner = owner;
+        this.passengers = passengers;
     }
 
     public RouteDto(Route route) {
@@ -41,5 +46,8 @@ public class RouteDto {
         this.vehicleType = route.getVehicleType();
         this.departure = route.getDeparture();
         this.availablePassengers = route.getAvailablePassengers();
+        this.owner = new RouteUserDto(route.getOwner());
+        this.passengers = new ArrayList<>();
+        route.getPassengers().forEach(user -> this.passengers.add(new RouteUserDto(user)));
     }
 }

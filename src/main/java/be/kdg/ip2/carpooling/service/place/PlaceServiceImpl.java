@@ -1,11 +1,13 @@
 package be.kdg.ip2.carpooling.service.place;
 
 import be.kdg.ip2.carpooling.domain.place.Place;
+import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,12 +33,22 @@ public class PlaceServiceImpl implements PlaceService{
     }
 
     @Override
+    public void save(Place place) {
+        placeRepository.save(place);
+    }
+
+    @Override
     public void deleteAll() {
         placeRepository.deleteAll();
     }
 
     @Override
-    public List<Place> findPlaceByLocationNear(Point point, Distance distance) {
+    public Place findPlaceByLocationAndSourceType(GeoJsonPoint location, SourceType sourceType) {
+        return placeRepository.findPlaceByLocationAndSourceType(location, sourceType);
+    }
+
+    @Override
+    public List<Place> findPlacesByLocationNear(Point point, Distance distance) {
         return placeRepository.findPlacesByLocationNear(point, distance);
     }
 }

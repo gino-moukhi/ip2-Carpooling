@@ -5,6 +5,7 @@ import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
+import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -29,9 +30,13 @@ public interface RouteService {
 
     Route updateRoute(RouteDto routeDto) throws RouteServiceException;
 
+    Route addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException;
+
     void deleteAll();
 
     void deleteRouteById(String id);
+
+    List<RouteDto> findRoutesWhereUserIsOwnerOrPassenger(String userId);
 
     //Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException;
 

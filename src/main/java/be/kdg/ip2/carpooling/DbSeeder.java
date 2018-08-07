@@ -35,7 +35,7 @@ public class DbSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         //clearUsers();
         //clearRoutes();
-        clearPlaces();
+        //clearPlaces();
         //createUsers();
         //createRoutes();
     }
@@ -74,7 +74,7 @@ public class DbSeeder implements CommandLineRunner {
         userService.deleteAll();
     }
 
-    private void createRoutes() {
+    private void createRoutes() throws UserServiceException {
         List<RouteLocation> waypointsForRoute1 = new ArrayList<>();
         List<RouteLocation> waypointsForRoute2 = new ArrayList<>();
         LocalDateTime timestamp = LocalDateTime.now();
@@ -88,12 +88,12 @@ public class DbSeeder implements CommandLineRunner {
                 new RouteLocation("Wilgendaalstraat 15, Schoten", new Point(51.253799, 4.495248)),
                 RouteType.RETURN,
                 waypointsForRoute1),
-                VehicleType.SEDAN,
                 timestamp,
-                3
+                3,
+                new RouteUser(userService.findUserByEmail("gino.moukhi@student.kdg.be"))
         );
         //waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", 51.297413, 4.573580));
-        waypointsForRoute2.add(new RouteLocation("Brugstraat 103, Brecht", new Point(51.297413, 4.573580)));
+        waypointsForRoute2.add(new RouteLocation("Brugstraat 103, 2960 Brecht, België", new Point(51.297413, 4.573580)));
         //waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", 51.253799, 4.495248));
         waypointsForRoute2.add(new RouteLocation("Wilgendaalstraat 15, Schoten", new Point(51.253799, 4.495248)));
         timestamp = LocalDateTime.of(2018, 7, 28, 18, 0);
@@ -102,12 +102,12 @@ public class DbSeeder implements CommandLineRunner {
                 //new RouteLocation("Eikenlei 8, Brecht", 51.303687, 4.566821),
                 new RouteLocation("Eikenlei 8, Brecht", new Point(51.303687, 4.566821)),
                 //new RouteLocation("Groenplaats, Antwerpen", 51.218962, 4.402153),
-                new RouteLocation("Groenplaats, Antwerpen", new Point(51.218962, 4.402153)),
+                new RouteLocation("Groenplaats, 2000 Antwerpen, België", new Point(51.218962, 4.402153)),
                 RouteType.SINGLE,
                 waypointsForRoute2),
-                VehicleType.SUV,
                 timestamp,
-                4
+                4,
+                new RouteUser(userService.findUserByEmail("jimmy.kotton@gmail.com"))
         );
         List<Route> routes = Arrays.asList(route1, route2);
         routes.forEach(route -> {

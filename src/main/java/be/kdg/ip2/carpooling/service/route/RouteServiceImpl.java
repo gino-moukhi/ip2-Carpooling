@@ -4,10 +4,13 @@ import be.kdg.ip2.carpooling.domain.place.Place;
 import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.domain.route.*;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
+import be.kdg.ip2.carpooling.domain.user.Gender;
+import be.kdg.ip2.carpooling.domain.user.RouteUser;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
-import be.kdg.ip2.carpooling.repository.place.PlaceRepository;
+import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
+import be.kdg.ip2.carpooling.service.place.PlaceService;
 import be.kdg.ip2.carpooling.util.DecimalUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +26,12 @@ import java.util.*;
 @Slf4j
 public class RouteServiceImpl implements RouteService {
     private RouteRepository routeRepository;
-    private PlaceRepository placeRepository;
+    private PlaceService placeService;
 
     @Autowired
-    public RouteServiceImpl(RouteRepository routeRepository, PlaceRepository placeRepository) {
+    public RouteServiceImpl(RouteRepository routeRepository, PlaceService placeService) {
         this.routeRepository = routeRepository;
-        this.placeRepository = placeRepository;
+        this.placeService = placeService;
     }
 
     @Override
@@ -59,9 +62,9 @@ public class RouteServiceImpl implements RouteService {
     public Route addRoute(RouteDto routeDto) throws RouteServiceException {
         log.info(routeDto.toString());
         Route route = new Route(routeDto);
-        Route rounded = DecimalUtil.roundLocationPoints(route);
+        route = DecimalUtil.roundLocationPoints(route);
         log.info(route.toString());
-        return saveWithCheck(rounded, false);
+        return saveWithCheck(route, false);
     }
 
     @Override
@@ -72,6 +75,19 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
+    public Route addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException {
+        Route route = routeRepository.findRouteById(routeId);
+        if (route.getAvailablePassengers() > 0) {
+            route.getPassengers().add(new RouteUser(routeUserDto));
+            route.setAvailablePassengers(route.getAvailablePassengers() - 1);
+        } else {
+            throw new RouteServiceException("There is no more room for passengers in this route");
+        }
+        log.info(route.toString());
+        return routeRepository.save(route);
+    }
+
+    @Override
     public void deleteAll() {
         routeRepository.deleteAll();
     }
@@ -79,6 +95,14 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public void deleteRouteById(String id) {
         routeRepository.deleteById(id);
+    }
+
+    @Override
+    public List<RouteDto> findRoutesWhereUserIsOwnerOrPassenger(String userId) {
+        List<Route> all = routeRepository.findRoutesWhereUserIsOwnerOrPassenger(userId);
+        List<RouteDto> allDto = new ArrayList<>();
+        all.forEach(route -> allDto.add(new RouteDto(route)));
+        return allDto;
     }
 
     @Override
@@ -105,16 +129,61 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public List<RouteDto> findRoutesNearLocationsSimple(SearchCriteria searchCriteria) {
+        return findRoutesFromCriteria(searchCriteria, true);
+    }
+
+    @Override
+    public List<RouteDto> findRoutesNearLocationsAdvanced(SearchCriteria searchCriteria) {
+        return findRoutesFromCriteria(searchCriteria, false);
+    }
+
+    private List<Route> applyBasicQueryFilters(/*boolean passengerFilter,*/ boolean departureFilter, boolean genderFilter, boolean smokerFilter, SearchCriteria searchCriteria) {
         QRoute qRoute = new QRoute("route");
-        BooleanExpression filterByAvailabePassengers = qRoute.availablePassengers.gt(0);
-        List<Route> allRoutes = (List<Route>) routeRepository.findAll(filterByAvailabePassengers);
-        //List<Route> allRoundedRoutes = new ArrayList<>();
-        //allRoutes.forEach(route -> allRoundedRoutes.add(DecimalUtil.roundLocationPoints(route)));
-        List<Place> allPlacesNearOrigin;
-        List<Place> allPlacesNearDestination;
+        BooleanExpression filterByAvailablePassengers = null;
+        BooleanExpression filterByDepartureTime = null;
+        BooleanExpression filterByGender = null;
+        BooleanExpression filterBySmoker = null;
+
+        filterByAvailablePassengers = qRoute.availablePassengers.gt(0);
+        /*if (passengerFilter) {
+            filterByAvailablePassengers = qRoute.availablePassengers.gt(0);
+        }*/
+        if (departureFilter) {
+            filterByDepartureTime = qRoute.departure.between(searchCriteria.getMinDepartureTime().plusHours(2),
+                    searchCriteria.getMaxDepartureTime().plusHours(2));
+        }
+        if (genderFilter) {
+            switch (searchCriteria.getGender()) {
+                case OPTION1:
+                    filterByGender = qRoute.owner.gender.eq(Gender.MALE);
+                    break;
+                case OPTION2:
+                    filterByGender = qRoute.owner.gender.eq(Gender.FEMALE);
+                    break;
+                case EITHER:
+                    filterByGender = qRoute.owner.gender.eq(Gender.MALE).or(qRoute.owner.gender.eq(Gender.FEMALE));
+                    break;
+            }
+        }
+        if (smokerFilter) {
+            switch (searchCriteria.getSmoker()) {
+                case OPTION1:
+                    filterBySmoker = qRoute.owner.smoker.eq(true);
+                    break;
+                case OPTION2:
+                    filterBySmoker = qRoute.owner.smoker.eq(false);
+                    break;
+                case EITHER:
+                    filterBySmoker = qRoute.owner.smoker.eq(true).or(qRoute.owner.smoker.eq(false));
+                    break;
+            }
+        }
+        return (List<Route>) routeRepository.findAll(filterByAvailablePassengers.and(filterBySmoker).and(filterByGender).and(filterByDepartureTime));
+    }
+
+    private void preparePlaceRepoForGeoSpatialQuery(List<Route> allRoutes) {
         Set<Place> places = new TreeSet<>();
 
-        //allRoundedRoutes.forEach(route -> {
         allRoutes.forEach(route -> {
             places.add(new Place(route.getDefinition().getOrigin().getLocationName(),
                     new GeoJsonPoint(route.getDefinition().getOrigin().getLocation()), SourceType.ORIGIN));
@@ -125,37 +194,55 @@ public class RouteServiceImpl implements RouteService {
         });
 
         places.forEach(place -> {
-            if (placeRepository.findPlaceByLocationAndSourceType(place.getLocation(), place.getSourceType()) == null) {
-                placeRepository.save(place);
+            if (placeService.findPlaceByLocationAndSourceType(place.getLocation(), place.getSourceType()) == null) {
+                placeService.save(place);
             }
         });
-        allPlacesNearOrigin = placeRepository.findPlacesByLocationNear(searchCriteria.getOrigin(), searchCriteria.getDistance());
-        allPlacesNearDestination = placeRepository.findPlacesByLocationNear(searchCriteria.getDestination(), searchCriteria.getDistance());
+    }
+
+    private Set<Route> executeGeoSpatialQueryAndFindMatchingRoutes(List<Route> filteredRoutes, SearchCriteria searchCriteria) {
+        List<Place> allPlacesNearOrigin = placeService.findPlacesByLocationNear(searchCriteria.getOrigin(), searchCriteria.getDistance());
+        List<Place> allPlacesNearDestination = placeService.findPlacesByLocationNear(searchCriteria.getDestination(), searchCriteria.getDistance());
         allPlacesNearOrigin.removeIf(place -> place.getSourceType().equals(SourceType.DESTINATION));
         allPlacesNearDestination.removeIf(place -> place.getSourceType().equals(SourceType.ORIGIN));
         Set<Route> matchingRoutesSet = new TreeSet<>();
 
         if (!allPlacesNearOrigin.isEmpty() && !allPlacesNearDestination.isEmpty()) {
-
             allPlacesNearOrigin.forEach(originPlace ->
                     allPlacesNearDestination.forEach(destinationPlace -> {
-                        List<Route> existingRoutesFromPlaces = routeRepository.findExistingRoutesFromPlaces(originPlace.getSourceType(),
+                        /*List<Route> existingRoutesFromPlaces = routeRepository.findExistingRoutesFromPlaces(originPlace.getSourceType(),
                                 destinationPlace.getSourceType(), new RouteLocation(originPlace.getLocationName(), new Point(originPlace.getLocation())),
                                 new RouteLocation(destinationPlace.getLocationName(), new Point(destinationPlace.getLocation())));
+                        matchingRoutesSet.addAll();*/
 
-                        matchingRoutesSet.addAll(existingRoutesFromPlaces);
+                        filteredRoutes.forEach(route -> {
+                            RouteLocation originRouteLocation = new RouteLocation(originPlace.getLocationName(), new Point(originPlace.getLocation()));
+                            RouteLocation destinationRouteLocation = new RouteLocation(destinationPlace.getLocationName(), new Point(destinationPlace.getLocation()));
+                            if ((route.getDefinition().getOrigin().compareTo(originRouteLocation) == 0 ||
+                                    route.getDefinition().getWaypoints().contains(originRouteLocation)) &&
+                                    (route.getDefinition().getDestination().compareTo(destinationRouteLocation) == 0 ||
+                                            route.getDefinition().getWaypoints().contains(destinationRouteLocation))) {
+                                matchingRoutesSet.add(route);
+                            }
+                        });
                     }));
-
         }
         log.info(matchingRoutesSet.toString());
-        List<RouteDto> routeDtos = new ArrayList<>();
-        matchingRoutesSet.forEach(route -> routeDtos.add(new RouteDto(route)));
-        return !routeDtos.isEmpty() ? routeDtos : null;
+        return matchingRoutesSet;
     }
 
-    @Override
-    public List<RouteDto> findRoutesNearLocationsAdvanced(SearchCriteria searchCriteria) {
-        return null;
+    private List<RouteDto> findRoutesFromCriteria(SearchCriteria searchCriteria, boolean simpleOrAdvanced) {
+        List<Route> allFilteredRoutes;
+        if (simpleOrAdvanced) {
+            allFilteredRoutes = applyBasicQueryFilters(false, false, false, searchCriteria);
+        } else {
+            allFilteredRoutes = applyBasicQueryFilters(true, true, true, searchCriteria);
+        }
+        preparePlaceRepoForGeoSpatialQuery(allFilteredRoutes);
+        Set<Route> matchingRoutesSet = executeGeoSpatialQueryAndFindMatchingRoutes(allFilteredRoutes, searchCriteria);
+        List<RouteDto> routeDtos = new ArrayList<>();
+        matchingRoutesSet.forEach(route -> routeDtos.add(new RouteDto(route)));
+        return routeDtos;
     }
 
     private Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException {

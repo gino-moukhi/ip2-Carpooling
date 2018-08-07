@@ -30,6 +30,10 @@ public class QRoute extends EntityPathBase<Route> {
 
     public final StringPath id = createString("id");
 
+    public final be.kdg.ip2.carpooling.domain.user.QRouteUser owner;
+
+    public final ListPath<be.kdg.ip2.carpooling.domain.user.RouteUser, be.kdg.ip2.carpooling.domain.user.QRouteUser> passengers = this.<be.kdg.ip2.carpooling.domain.user.RouteUser, be.kdg.ip2.carpooling.domain.user.QRouteUser>createList("passengers", be.kdg.ip2.carpooling.domain.user.RouteUser.class, be.kdg.ip2.carpooling.domain.user.QRouteUser.class, PathInits.DIRECT2);
+
     public final EnumPath<be.kdg.ip2.carpooling.domain.user.VehicleType> vehicleType = createEnum("vehicleType", be.kdg.ip2.carpooling.domain.user.VehicleType.class);
 
     public QRoute(String variable) {
@@ -51,6 +55,7 @@ public class QRoute extends EntityPathBase<Route> {
     public QRoute(Class<? extends Route> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.definition = inits.isInitialized("definition") ? new QRouteDefinition(forProperty("definition")) : null;
+        this.owner = inits.isInitialized("owner") ? new be.kdg.ip2.carpooling.domain.user.QRouteUser(forProperty("owner"), inits.get("owner")) : null;
     }
 
 }

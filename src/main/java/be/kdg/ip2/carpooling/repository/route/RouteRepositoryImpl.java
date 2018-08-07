@@ -52,6 +52,16 @@ public class RouteRepositoryImpl implements CustomRouteRepository {
         }
     }
 
+    @Override
+    public List<Route> findRoutesWhereUserIsOwnerOrPassenger(String userId) {
+        Query query = new Query();
+        query.addCriteria(new Criteria().orOperator(
+                Criteria.where("owner._id").is(userId),
+                Criteria.where("passengers").elemMatch(Criteria.where("_id").is(userId))
+        ));
+        return mongoOperations.find(query, Route.class);
+    }
+
     private void CriteriaGeneratorFromSourceType(SourceType sourceType, Point point, Query query) {
         switch (sourceType) {
             case ORIGIN:
