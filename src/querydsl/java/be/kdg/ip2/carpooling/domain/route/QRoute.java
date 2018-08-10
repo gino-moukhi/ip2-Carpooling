@@ -24,6 +24,8 @@ public class QRoute extends EntityPathBase<Route> {
 
     public final NumberPath<Integer> availablePassengers = createNumber("availablePassengers", Integer.class);
 
+    public final ListPath<be.kdg.ip2.carpooling.domain.communication.CommunicationRequest, be.kdg.ip2.carpooling.domain.communication.QCommunicationRequest> communicationRequests = this.<be.kdg.ip2.carpooling.domain.communication.CommunicationRequest, be.kdg.ip2.carpooling.domain.communication.QCommunicationRequest>createList("communicationRequests", be.kdg.ip2.carpooling.domain.communication.CommunicationRequest.class, be.kdg.ip2.carpooling.domain.communication.QCommunicationRequest.class, PathInits.DIRECT2);
+
     public final QRouteDefinition definition;
 
     public final DateTimePath<java.time.LocalDateTime> departure = createDateTime("departure", java.time.LocalDateTime.class);
@@ -54,7 +56,7 @@ public class QRoute extends EntityPathBase<Route> {
 
     public QRoute(Class<? extends Route> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.definition = inits.isInitialized("definition") ? new QRouteDefinition(forProperty("definition")) : null;
+        this.definition = inits.isInitialized("definition") ? new QRouteDefinition(forProperty("definition"), inits.get("definition")) : null;
         this.owner = inits.isInitialized("owner") ? new be.kdg.ip2.carpooling.domain.user.QRouteUser(forProperty("owner"), inits.get("owner")) : null;
     }
 

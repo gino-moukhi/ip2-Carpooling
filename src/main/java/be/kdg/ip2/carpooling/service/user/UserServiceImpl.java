@@ -47,22 +47,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(UserDto user) throws UserServiceException {
-        return saveWithCheck(new User(user), false);
+        return saveWithCheck(new User(user));
     }
 
     @Override
     public User addUser(User user) throws UserServiceException {
-        return saveWithCheck(user, false);
+        return saveWithCheck(user);
     }
 
     @Override
     public User updateUser(UserDto user) throws UserServiceException {
-        return saveWithCheck(new User(user), true);
+        return userRepository.save(new User(user));
     }
 
     @Override
     public User updateUser(User user) throws UserServiceException {
-        return saveWithCheck(user, true);
+        return userRepository.save(user);
     }
 
     @Override
@@ -107,18 +107,11 @@ public class UserServiceImpl implements UserService {
         return (List<User>) userRepository.findAll(filterByCity.and(filterByPassengerSpace));
     }
 
-    private User saveWithCheck(User user, boolean useIdOrEmail) throws UserServiceException {
-        User foundUser;
-        User userToSave;
-        if (useIdOrEmail) {
-            userToSave = user;
-        } else {
-            foundUser = userRepository.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
-            if (foundUser != null) {
-                user.setId(foundUser.getId());
-            }
-            userToSave = user;
+    private User saveWithCheck(User user) throws UserServiceException {
+        User foundUser = userRepository.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
+        if (foundUser != null) {
+            user.setId(foundUser.getId());
         }
-        return userRepository.save(userToSave);
+        return userRepository.save(user);
     }
 }

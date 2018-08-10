@@ -1,5 +1,6 @@
 package be.kdg.ip2.carpooling.dto;
 
+import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import lombok.*;
@@ -20,14 +21,16 @@ public class RouteDto {
     private int availablePassengers;
     private RouteUserDto owner;
     private List<RouteUserDto> passengers;
+    private List<CommunicationRequestDto> communicationRequests;
 
-    public RouteDto(RouteDefinitionDto routeDefinition, LocalDateTime departure, int availablePassengers, RouteUserDto owner, List<RouteUserDto> passengers) {
+    public RouteDto(RouteDefinitionDto routeDefinition, LocalDateTime departure, int availablePassengers, RouteUserDto owner, List<RouteUserDto> passengers, List<CommunicationRequestDto> communicationRequests) {
         this.routeDefinition = routeDefinition;
         this.vehicleType = owner.getVehicle().getType();
         this.departure = departure;
         this.availablePassengers = availablePassengers;
         this.owner = owner;
         this.passengers = passengers;
+        this.communicationRequests = communicationRequests;
     }
 
     public RouteDto(Route route) {
@@ -49,5 +52,11 @@ public class RouteDto {
         this.owner = new RouteUserDto(route.getOwner());
         this.passengers = new ArrayList<>();
         route.getPassengers().forEach(user -> this.passengers.add(new RouteUserDto(user)));
+        this.communicationRequests = new ArrayList<>();
+        if (route.getCommunicationRequests() == null) {
+            route.setCommunicationRequests(new ArrayList<>());
+        } else {
+            route.getCommunicationRequests().forEach( request -> this.communicationRequests.add(new CommunicationRequestDto(request)));
+        }
     }
 }

@@ -18,26 +18,38 @@ public class QRouteDefinition extends BeanPath<RouteDefinition> {
 
     private static final long serialVersionUID = -1336641765L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QRouteDefinition routeDefinition = new QRouteDefinition("routeDefinition");
 
-    public final ComparablePath<RouteLocation> destination = createComparable("destination", RouteLocation.class);
+    public final QRouteLocation destination;
 
-    public final ComparablePath<RouteLocation> origin = createComparable("origin", RouteLocation.class);
+    public final QRouteLocation origin;
 
     public final EnumPath<RouteType> routeType = createEnum("routeType", RouteType.class);
 
-    public final ListPath<RouteLocation, ComparablePath<RouteLocation>> waypoints = this.<RouteLocation, ComparablePath<RouteLocation>>createList("waypoints", RouteLocation.class, ComparablePath.class, PathInits.DIRECT2);
+    public final ListPath<RouteLocation, QRouteLocation> waypoints = this.<RouteLocation, QRouteLocation>createList("waypoints", RouteLocation.class, QRouteLocation.class, PathInits.DIRECT2);
 
     public QRouteDefinition(String variable) {
-        super(RouteDefinition.class, forVariable(variable));
+        this(RouteDefinition.class, forVariable(variable), INITS);
     }
 
     public QRouteDefinition(Path<? extends RouteDefinition> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QRouteDefinition(PathMetadata metadata) {
-        super(RouteDefinition.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QRouteDefinition(PathMetadata metadata, PathInits inits) {
+        this(RouteDefinition.class, metadata, inits);
+    }
+
+    public QRouteDefinition(Class<? extends RouteDefinition> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.destination = inits.isInitialized("destination") ? new QRouteLocation(forProperty("destination"), inits.get("destination")) : null;
+        this.origin = inits.isInitialized("origin") ? new QRouteLocation(forProperty("origin"), inits.get("origin")) : null;
     }
 
 }

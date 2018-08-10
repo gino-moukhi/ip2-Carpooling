@@ -1,5 +1,7 @@
 package be.kdg.ip2.carpooling.service.route;
 
+import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
+import be.kdg.ip2.carpooling.domain.communication.CommunicationRequestStatus;
 import be.kdg.ip2.carpooling.domain.place.Place;
 import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.domain.route.*;
@@ -10,7 +12,10 @@ import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
+import be.kdg.ip2.carpooling.service.communication.CommunicationService;
 import be.kdg.ip2.carpooling.service.place.PlaceService;
+import be.kdg.ip2.carpooling.service.user.UserService;
+import be.kdg.ip2.carpooling.service.user.UserServiceException;
 import be.kdg.ip2.carpooling.util.DecimalUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @Service
@@ -27,11 +33,15 @@ import java.util.*;
 public class RouteServiceImpl implements RouteService {
     private RouteRepository routeRepository;
     private PlaceService placeService;
+    //private UserService userService;
+    private CommunicationService communicationService;
 
     @Autowired
-    public RouteServiceImpl(RouteRepository routeRepository, PlaceService placeService) {
+    public RouteServiceImpl(RouteRepository routeRepository, PlaceService placeService, UserService userService, CommunicationService communicationService) {
         this.routeRepository = routeRepository;
         this.placeService = placeService;
+        //this.userService = userService;
+        this.communicationService = communicationService;
     }
 
     @Override
@@ -48,14 +58,19 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public RouteDto findRouteById(String id) throws RouteServiceException {
+    public Route findRouteById(String id) throws RouteServiceException {
+        return routeRepository.findRouteById(id);
+    }
+
+    @Override
+    public RouteDto findRouteDtoById(String id) throws RouteServiceException {
         return new RouteDto(routeRepository.findRouteById(id));
     }
 
     @Override
     public Route addRoute(Route route) throws RouteServiceException {
         Route rounded = DecimalUtil.roundLocationPoints(route);
-        return saveWithCheck(rounded, false);
+        return saveWithCheck(rounded);
     }
 
     @Override
@@ -64,37 +79,123 @@ public class RouteServiceImpl implements RouteService {
         Route route = new Route(routeDto);
         route = DecimalUtil.roundLocationPoints(route);
         log.info(route.toString());
-        return saveWithCheck(route, false);
+        return saveWithCheck(route);
+    }
+
+    @Override
+    public void addCommunicationRequestToRoute(CommunicationRequest request) {
+        Route routeForRequest = routeRepository.findRouteById(request.getRouteId());
+        if (routeForRequest.getCommunicationRequests() == null) {
+            routeForRequest.setCommunicationRequests(new ArrayList<>());
+        }
+        if (!routeForRequest.getCommunicationRequests().contains(request)) {
+            routeForRequest.getCommunicationRequests().add(request);
+        }
+        checkCommunicationRequestStatusAndHandle(routeForRequest, request);
+    }
+
+    @Override
+    public void updateCommunicationRequestOfRoute(CommunicationRequest communicationRequest) {
+        communicationRequest.getOrigin().setLocation(DecimalUtil.roundPoint(communicationRequest.getOrigin().getLocation()));
+        communicationRequest.getDestination().setLocation(DecimalUtil.roundPoint(communicationRequest.getDestination().getLocation()));
+        Route routeToUpdate = routeRepository.findRouteById(communicationRequest.getRouteId());
+        routeToUpdate.getCommunicationRequests().forEach(request -> {
+            if (request.getId().equals(communicationRequest.getId())) {
+                //request = communicationRequest;
+                routeToUpdate.getCommunicationRequests().set(routeToUpdate.getCommunicationRequests().indexOf(request),communicationRequest);
+                log.info("UPDATED: communication request " + request.getId() + " in route " + routeToUpdate.getId());
+                checkCommunicationRequestStatusAndHandle(routeToUpdate, communicationRequest);
+            }
+        });
+    }
+
+    /*@Override
+    public void updateCommunicationRequestStatusOfRoute(String routeId, String communicationRequestId, CommunicationRequestStatus requestStatus) {
+        Route routeToUpdate = routeRepository.findRouteById(routeId);
+        routeToUpdate.getCommunicationRequests().forEach(request -> {
+            if (request.getId().equals(communicationRequestId)) {
+                request.setRequestStatus(requestStatus);
+                checkCommunicationRequestStatusAndHandle(routeToUpdate, request.getUserId(), request.getRequestStatus());
+            }
+        });
+    }*/
+
+    @Override
+    public void deleteCommunicationRequestOfRoute(String routeId, String communicationRequestId) {
+        Route routeToDelete = routeRepository.findRouteById(routeId);
+        routeToDelete.getCommunicationRequests().forEach(request -> {
+            if (request.getId().equals(communicationRequestId)) {
+                deletePassengersFromRouteAndUpdateAvailablePassengers(routeToDelete, request.getUserId());
+                deleteWaypointsFromRoute(routeToDelete, request.getId(), request.getOrigin(), request.getDestination());
+            }
+        });
+        routeToDelete.getCommunicationRequests().removeIf(request -> request.getId().equals(communicationRequestId));
+        routeRepository.save(routeToDelete);
     }
 
     @Override
     public Route updateRoute(RouteDto routeDto) throws RouteServiceException {
         Route route = new Route(routeDto);
         Route rounded = DecimalUtil.roundLocationPoints(route);
-        return saveWithCheck(rounded, true);
+        return routeRepository.save(rounded);
     }
 
     @Override
-    public Route addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException {
-        Route route = routeRepository.findRouteById(routeId);
-        if (route.getAvailablePassengers() > 0) {
-            route.getPassengers().add(new RouteUser(routeUserDto));
-            route.setAvailablePassengers(route.getAvailablePassengers() - 1);
-        } else {
-            throw new RouteServiceException("There is no more room for passengers in this route");
-        }
-        log.info(route.toString());
-        return routeRepository.save(route);
+    public void updateUserOfRoute(RouteUser user) throws RouteServiceException {
+        List<Route> foundRoutes = routeRepository.findRoutesWhereUserIsOwnerOrPassenger(user.getId());
+        foundRoutes.forEach(route -> {
+            if (route.getOwner().getId().equals(user.getId())) {
+                route.setOwner(user);
+            }
+            route.getPassengers().forEach(passenger -> {
+                if (passenger.getId().equals(user.getId())) {
+                    route.getPassengers().set(route.getPassengers().indexOf(passenger), user);
+                }
+            });
+        });
+        routeRepository.saveAll(foundRoutes);
+    }
+
+    @Override
+    public void addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException {
+        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUserDto.getId());
+    }
+
+    @Override
+    public void addPassengerToRoute(String routeId, RouteUser routeUser) throws RouteServiceException {
+        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUser.getId());
+    }
+
+    @Override
+    public void addPassengerToRoute(String routeId, String userId) throws RouteServiceException {
+        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), userId);
+    }
+
+    @Override
+    public void deletePassengerFromRoute(String routeId, RouteUserDto routeUserDto) {
+        deletePassengersFromRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUserDto.getId());
+    }
+
+    @Override
+    public void deletePassengerFromRoute(String routeId, RouteUser routeUser) {
+        deletePassengersFromRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUser.getId());
+    }
+
+    @Override
+    public void deletePassengerFromRoute(String routeId, String userId) {
+        deletePassengersFromRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), userId);
     }
 
     @Override
     public void deleteAll() {
         routeRepository.deleteAll();
+        communicationService.deleteAll();
     }
 
     @Override
     public void deleteRouteById(String id) {
         routeRepository.deleteById(id);
+        communicationService.deleteCommunicationRequestByRouteId(id);
     }
 
     @Override
@@ -245,19 +346,83 @@ public class RouteServiceImpl implements RouteService {
         return routeDtos;
     }
 
-    private Route saveWithCheck(Route route, boolean useIdOrRouteDefinition) throws RouteServiceException {
-        Route foundRoute;
-        Route routeToSave;
-        if (useIdOrRouteDefinition) {
-            routeToSave = route;
-        } else {
-            foundRoute = routeRepository.findRouteByDefinition_OriginAndDefinition_Destination(route.getDefinition().getOrigin(),
-                    route.getDefinition().getDestination());
-            if (foundRoute != null) {
-                route.setId(foundRoute.getId());
+    private void checkCommunicationRequestStatusAndHandle(Route route, CommunicationRequest request) {
+        try {
+            switch (request.getRequestStatus()) {
+                case IN_PROGRESS:
+                    break;
+                case ACCEPTED:
+                    addPassengersToRouteAndUpdateAvailablePassengers(route, request.getUserId());
+                    addWaypointsToRoute(route, request.getOrigin(), request.getDestination());
+                    break;
+                case DECLINED:
+                    deletePassengersFromRouteAndUpdateAvailablePassengers(route, request.getUserId());
+                    deleteWaypointsFromRoute(route, request.getId(), request.getOrigin(), request.getDestination());
+                    break;
             }
-            routeToSave = route;
+            routeRepository.save(route);
+        } catch (RouteServiceException e) {
+            log.error("Something went wrong with the adding or removing from passengers to the route", e);
         }
-        return routeRepository.save(routeToSave);
+    }
+
+    private void deletePassengersFromRouteAndUpdateAvailablePassengers(Route route, String userId) {
+        int passengersBeforeDeleteCall = route.getPassengers().size();
+        route.getPassengers().removeIf(routeUser -> routeUser.getId().equals(userId));
+        if (route.getPassengers().size() != passengersBeforeDeleteCall) {
+            route.setAvailablePassengers(route.getAvailablePassengers() + 1);
+        }
+    }
+
+    private void addPassengersToRouteAndUpdateAvailablePassengers(Route route, String userId) throws RouteServiceException {
+        /*try {
+            RouteUser routeUser = new RouteUser(userService.findUserById(userId));
+            if (route.getAvailablePassengers() > 0 && !route.getPassengers().contains(routeUser)) {
+                route.getPassengers().add(routeUser);
+                route.setAvailablePassengers(route.getAvailablePassengers() - 1);
+            }
+        } catch (UserServiceException e) {
+            throw new RouteServiceException("Could not find the user in the database", e);
+        }*/
+    }
+
+    private void addWaypointsToRoute(Route route, RouteLocation wp1, RouteLocation wp2) {
+        waypointCheckerAndHandler(route, wp1, null, CommunicationRequestStatus.ACCEPTED);
+        waypointCheckerAndHandler(route, wp2, null, CommunicationRequestStatus.ACCEPTED);
+    }
+
+    private void deleteWaypointsFromRoute(Route route, String requestId, RouteLocation wp1, RouteLocation wp2) {
+        waypointCheckerAndHandler(route, wp1, requestId, CommunicationRequestStatus.DECLINED);
+        waypointCheckerAndHandler(route, wp2, requestId, CommunicationRequestStatus.DECLINED);
+    }
+
+    private void waypointCheckerAndHandler(Route route, RouteLocation wp, @Nullable String requestId, CommunicationRequestStatus status) {
+        if (status.equals(CommunicationRequestStatus.ACCEPTED)) {
+            if (!route.getDefinition().getOrigin().equals(wp) && !route.getDefinition().getDestination().equals(wp)) {
+                if (!route.getDefinition().getWaypoints().contains(wp)) {
+                    route.getDefinition().getWaypoints().add(wp);
+                }
+            }
+        } else if (status.equals(CommunicationRequestStatus.DECLINED)) {
+            Set<RouteLocation> otherUsedWaypoints = new TreeSet<>();
+            route.getCommunicationRequests().forEach(request -> {
+                if (!request.getId().equals(requestId) && request.getRequestStatus().equals(CommunicationRequestStatus.ACCEPTED)) {
+                    otherUsedWaypoints.add(request.getOrigin());
+                    otherUsedWaypoints.add(request.getDestination());
+                }
+            });
+            if (!otherUsedWaypoints.contains(wp)) {
+                route.getDefinition().getWaypoints().removeIf(waypoint -> waypoint.equals(wp));
+            }
+        }
+    }
+
+    private Route saveWithCheck(Route route) {
+        Route foundRoute = routeRepository.findRouteByDefinition_OriginAndDefinition_Destination(route.getDefinition().getOrigin(),
+                route.getDefinition().getDestination());
+        if (foundRoute != null) {
+            route.setId(foundRoute.getId());
+        }
+        return routeRepository.save(route);
     }
 }

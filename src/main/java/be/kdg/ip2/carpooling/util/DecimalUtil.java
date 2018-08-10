@@ -1,11 +1,14 @@
 package be.kdg.ip2.carpooling.util;
 
 import be.kdg.ip2.carpooling.domain.route.Route;
+import be.kdg.ip2.carpooling.domain.route.RouteLocation;
 import org.springframework.data.geo.Point;
 
 import java.math.BigDecimal;
 
 public class DecimalUtil {
+    private static final int MAX_DECIMALS_FOR_LOCATION_POINT = 6;
+
     public static double round(double val, int numberOfDigits) {
         BigDecimal bigDecimal = new BigDecimal(val);
         bigDecimal = bigDecimal.setScale(numberOfDigits, BigDecimal.ROUND_HALF_EVEN);
@@ -14,8 +17,16 @@ public class DecimalUtil {
 
     public static double roundForPoint(double val) {
         BigDecimal bigDecimal = new BigDecimal(val);
-        bigDecimal = bigDecimal.setScale(6, BigDecimal.ROUND_HALF_EVEN);
+        bigDecimal = bigDecimal.setScale(MAX_DECIMALS_FOR_LOCATION_POINT, BigDecimal.ROUND_HALF_EVEN);
         return bigDecimal.doubleValue();
+    }
+
+    public static Point roundPoint(Point point) {
+        BigDecimal x = new BigDecimal(point.getX());
+        BigDecimal y = new BigDecimal(point.getY());
+        x = x.setScale(MAX_DECIMALS_FOR_LOCATION_POINT, BigDecimal.ROUND_HALF_EVEN);
+        y = y.setScale(MAX_DECIMALS_FOR_LOCATION_POINT, BigDecimal.ROUND_HALF_EVEN);
+        return new Point(x.doubleValue(), y.doubleValue());
     }
 
     public static Route roundLocationPoints(Route route) {

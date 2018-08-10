@@ -3,8 +3,6 @@ package be.kdg.ip2.carpooling.unit;
 import be.kdg.ip2.carpooling.domain.place.SourceType;
 import be.kdg.ip2.carpooling.domain.route.*;
 import be.kdg.ip2.carpooling.domain.user.Gender;
-import be.kdg.ip2.carpooling.domain.user.QRouteUser;
-import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
@@ -14,19 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.geo.*;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.IndexInfo;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.repository.support.SpringDataMongodbQuery;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.lang.reflect.WildcardType;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -37,8 +30,6 @@ public class RouteRepoTest {
     private RouteRepository repo;
     @Autowired
     private MongoOperations mongoOperations;
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Test
     public void testMongoOperations() {
@@ -97,6 +88,12 @@ public class RouteRepoTest {
         return uniqueRoutes;
     }
 
+    @Test
+    public void clearCommunicationRequestsTest() {
+        Route route = repo.findRouteById("5b675815d3303d3a74c4a339");
+        route.getCommunicationRequests().clear();
+        repo.save(route);
+    }
     @Test
     public void testDbSeeder() {
         /*assertEquals(2, repo.findAll().size());

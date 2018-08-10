@@ -30,6 +30,7 @@ public class UserRepoTest {
 
     @Before
     public void setUp() {
+
         //Uses the DbSeeder to create objects
     }
 

@@ -20,7 +20,6 @@ public class User {
     private String password;
     private Name name;
     private Address address;
-    //@Indexed(direction = IndexDirection.ASCENDING)
     private int age;
     private Gender gender;
     private boolean smoker;

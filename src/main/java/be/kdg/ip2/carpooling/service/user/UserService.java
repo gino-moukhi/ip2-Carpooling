@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+//@Service
 public interface UserService {
     User findUserById(String id) throws UserServiceException;
 

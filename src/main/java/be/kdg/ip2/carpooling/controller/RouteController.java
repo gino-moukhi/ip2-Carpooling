@@ -3,6 +3,7 @@ package be.kdg.ip2.carpooling.controller;
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
+import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import be.kdg.ip2.carpooling.service.route.RouteService;
@@ -37,7 +38,7 @@ public class RouteController {
 
     @GetMapping("/{id}")
     public RouteDto getRoute(@PathVariable("id") String id) throws RouteServiceException {
-        return routeService.findRouteById(id);
+        return routeService.findRouteDtoById(id);
     }
 
     @PostMapping
@@ -52,7 +53,9 @@ public class RouteController {
 
     @PutMapping("/route/passenger")
     public Route addPassengerToRoute(@RequestParam String routeId, @RequestBody RouteUserDto routeUserDto) throws RouteServiceException {
-        return routeService.addPassengerToRoute(routeId, routeUserDto);
+        // USE THE COMMUNICATION REQUEST FOR THE ADDING AND REMOVING OF PASSENGERS
+        //return routeService.addPassengerToRoute(routeId, routeUserDto);
+        return null;
     }
 
     @DeleteMapping
@@ -61,29 +64,9 @@ public class RouteController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAll(@PathVariable("id") String id) {
+    public void deleteAll(@PathVariable("id") String id) throws RouteServiceException {
         routeService.deleteRouteById(id);
     }
-
-
-    /*@GetMapping("/location/{lat}/{long}/{distance}")
-    public List<Route> getRoutesNearLocation(@PathVariable("lat") double lat,
-                                             @PathVariable("long") double lng,
-                                             @PathVariable("distance") double distance) throws RouteServiceException {
-        return routeService.findRoutesByDefinition_Origin_LocationNear(new Point(lat, lng), new Distance(distance, Metrics.KILOMETERS));
-    }*/
-
-    /*@GetMapping("/location/{lat}/{long}/{lat1}/{long1}/{distance}")
-    public List<RouteDto> getRoutesNearLocationsSimple(@PathVariable("lat") double lat,
-                                              @PathVariable("long") double lng,
-                                              @PathVariable("lat1") double lat1,
-                                              @PathVariable("long1") double lng1,
-                                              @PathVariable("distance") double d) throws RouteServiceException {
-        Point origin = new Point(lat, lng);
-        Point destination = new Point(lat1, lng1);
-        Distance distance = new Distance(d, Metrics.KILOMETERS);
-        return routeService.findRoutesNearLocationsSimple(origin, destination, distance);
-    }*/
 
     @GetMapping("/myRoutes")
     public List<RouteDto> getRoutesOfUser(@RequestParam String userId) {

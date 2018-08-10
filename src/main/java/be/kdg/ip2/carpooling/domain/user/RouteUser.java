@@ -1,6 +1,7 @@
 package be.kdg.ip2.carpooling.domain.user;
 
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
+import be.kdg.ip2.carpooling.dto.UserDto;
 import lombok.*;
 
 import java.util.Comparator;
@@ -36,6 +37,16 @@ public class RouteUser implements Comparable<RouteUser> {
         this.gender = user.getGender();
         this.smoker = user.isSmoker();
         this.vehicle = user.getVehicle();
+    }
+
+    public RouteUser(UserDto dto) {
+        this.id = dto.getId();
+        this.email = dto.getEmail();
+        this.name = dto.getName();
+        this.age = dto.getAge();
+        this.gender = dto.getGender();
+        this.smoker = dto.isSmoker();
+        this.vehicle = dto.getVehicle();
     }
 
     public RouteUser(RouteUserDto userDto) {
