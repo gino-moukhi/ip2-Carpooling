@@ -9,13 +9,11 @@ import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
 import be.kdg.ip2.carpooling.domain.user.Gender;
 import be.kdg.ip2.carpooling.domain.user.RouteUser;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
+import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import be.kdg.ip2.carpooling.repository.route.RouteRepository;
-import be.kdg.ip2.carpooling.service.communication.CommunicationService;
 import be.kdg.ip2.carpooling.service.place.PlaceService;
-import be.kdg.ip2.carpooling.service.user.UserService;
-import be.kdg.ip2.carpooling.service.user.UserServiceException;
 import be.kdg.ip2.carpooling.util.DecimalUtil;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
@@ -33,15 +31,11 @@ import java.util.*;
 public class RouteServiceImpl implements RouteService {
     private RouteRepository routeRepository;
     private PlaceService placeService;
-    //private UserService userService;
-    private CommunicationService communicationService;
 
     @Autowired
-    public RouteServiceImpl(RouteRepository routeRepository, PlaceService placeService, UserService userService, CommunicationService communicationService) {
+    public RouteServiceImpl(RouteRepository routeRepository, PlaceService placeService) {
         this.routeRepository = routeRepository;
         this.placeService = placeService;
-        //this.userService = userService;
-        this.communicationService = communicationService;
     }
 
     @Override
@@ -83,7 +77,14 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public void addCommunicationRequestToRoute(CommunicationRequest request) {
+    public RouteDto addRouteAsDto(RouteDto routeDto) throws RouteServiceException {
+        Route route = new Route(routeDto);
+        route = DecimalUtil.roundLocationPoints(route);
+        return new RouteDto(saveWithCheck(route));
+    }
+
+    @Override
+    public RouteDto addCommunicationRequestToRoute(CommunicationRequest request) {
         Route routeForRequest = routeRepository.findRouteById(request.getRouteId());
         if (routeForRequest.getCommunicationRequests() == null) {
             routeForRequest.setCommunicationRequests(new ArrayList<>());
@@ -92,21 +93,32 @@ public class RouteServiceImpl implements RouteService {
             routeForRequest.getCommunicationRequests().add(request);
         }
         checkCommunicationRequestStatusAndHandle(routeForRequest, request);
+        return new RouteDto(routeForRequest);
     }
 
     @Override
-    public void updateCommunicationRequestOfRoute(CommunicationRequest communicationRequest) {
-        communicationRequest.getOrigin().setLocation(DecimalUtil.roundPoint(communicationRequest.getOrigin().getLocation()));
-        communicationRequest.getDestination().setLocation(DecimalUtil.roundPoint(communicationRequest.getDestination().getLocation()));
-        Route routeToUpdate = routeRepository.findRouteById(communicationRequest.getRouteId());
-        routeToUpdate.getCommunicationRequests().forEach(request -> {
-            if (request.getId().equals(communicationRequest.getId())) {
-                //request = communicationRequest;
-                routeToUpdate.getCommunicationRequests().set(routeToUpdate.getCommunicationRequests().indexOf(request),communicationRequest);
-                log.info("UPDATED: communication request " + request.getId() + " in route " + routeToUpdate.getId());
-                checkCommunicationRequestStatusAndHandle(routeToUpdate, communicationRequest);
-            }
-        });
+    public RouteDto addCommunicationRequestToRoute(CommunicationRequestDto requestDto) {
+        Route routeForRequest = routeRepository.findRouteById(requestDto.getRouteId());
+        CommunicationRequest request = new CommunicationRequest(requestDto);
+        if (routeForRequest.getCommunicationRequests() == null) {
+            routeForRequest.setCommunicationRequests(new ArrayList<>());
+        }
+        if (!routeForRequest.getCommunicationRequests().contains(request)) {
+            routeForRequest.getCommunicationRequests().add(request);
+        }
+        checkCommunicationRequestStatusAndHandle(routeForRequest, request);
+        return new RouteDto(routeForRequest);
+    }
+
+    @Override
+    public RouteDto updateCommunicationRequestOfRoute(CommunicationRequest communicationRequest) {
+        return updateCommunicationRequest(communicationRequest);
+    }
+
+    @Override
+    public RouteDto updateCommunicationRequestOfRoute(CommunicationRequestDto requestDto) {
+        CommunicationRequest communicationRequest = new CommunicationRequest(requestDto);
+        return updateCommunicationRequest(communicationRequest);
     }
 
     /*@Override
@@ -125,7 +137,7 @@ public class RouteServiceImpl implements RouteService {
         Route routeToDelete = routeRepository.findRouteById(routeId);
         routeToDelete.getCommunicationRequests().forEach(request -> {
             if (request.getId().equals(communicationRequestId)) {
-                deletePassengersFromRouteAndUpdateAvailablePassengers(routeToDelete, request.getUserId());
+                deletePassengersFromRouteAndUpdateAvailablePassengers(routeToDelete, request.getUser().getId());
                 deleteWaypointsFromRoute(routeToDelete, request.getId(), request.getOrigin(), request.getDestination());
             }
         });
@@ -141,34 +153,58 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public void updateUserOfRoute(RouteUser user) throws RouteServiceException {
+    public RouteDto updateRouteAsDto(RouteDto routeDto) throws RouteServiceException {
+        Route route = new Route(routeDto);
+        Route rounded = DecimalUtil.roundLocationPoints(route);
+        return new RouteDto(routeRepository.save(rounded));
+    }
+
+    @Override
+    public void updateUsersOfRoute(RouteUser user) throws RouteServiceException {
+        Set<Route> uniqueRoutes = new TreeSet<>();
         List<Route> foundRoutes = routeRepository.findRoutesWhereUserIsOwnerOrPassenger(user.getId());
-        foundRoutes.forEach(route -> {
+        List<Route> foundRoutes2 = routeRepository.findRoutesByCommunicationRequestUser(user.getId());
+        uniqueRoutes.addAll(foundRoutes);
+        uniqueRoutes.addAll(foundRoutes2);
+        uniqueRoutes.forEach(route -> {
+            boolean isOwner = false;
             if (route.getOwner().getId().equals(user.getId())) {
                 route.setOwner(user);
+                isOwner = true;
+            }
+            if (isOwner && !route.getVehicleType().equals(user.getVehicle().getType())) {
+                route.setVehicleType(user.getVehicle().getType());
+            }
+            if (isOwner && route.getAvailablePassengers() != user.getVehicle().getNumberOfPassengers() - route.getPassengers().size()) {
+                route.setAvailablePassengers(user.getVehicle().getNumberOfPassengers() - route.getPassengers().size());
             }
             route.getPassengers().forEach(passenger -> {
                 if (passenger.getId().equals(user.getId())) {
                     route.getPassengers().set(route.getPassengers().indexOf(passenger), user);
                 }
             });
+            route.getCommunicationRequests().forEach(request -> {
+                if (request.getUser().getId().equals(user.getId())) {
+                    request.setUser(user);
+                }
+            });
         });
-        routeRepository.saveAll(foundRoutes);
+        routeRepository.saveAll(uniqueRoutes);
     }
 
     @Override
     public void addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException {
-        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUserDto.getId());
+        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), new RouteUser(routeUserDto));
     }
 
     @Override
     public void addPassengerToRoute(String routeId, RouteUser routeUser) throws RouteServiceException {
-        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUser.getId());
+        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), routeUser);
     }
 
     @Override
     public void addPassengerToRoute(String routeId, String userId) throws RouteServiceException {
-        addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), userId);
+        //addPassengersToRouteAndUpdateAvailablePassengers(routeRepository.findRouteById(routeId), userId);
     }
 
     @Override
@@ -189,13 +225,11 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public void deleteAll() {
         routeRepository.deleteAll();
-        communicationService.deleteAll();
     }
 
     @Override
     public void deleteRouteById(String id) {
         routeRepository.deleteById(id);
-        communicationService.deleteCommunicationRequestByRouteId(id);
     }
 
     @Override
@@ -319,9 +353,9 @@ public class RouteServiceImpl implements RouteService {
                         filteredRoutes.forEach(route -> {
                             RouteLocation originRouteLocation = new RouteLocation(originPlace.getLocationName(), new Point(originPlace.getLocation()));
                             RouteLocation destinationRouteLocation = new RouteLocation(destinationPlace.getLocationName(), new Point(destinationPlace.getLocation()));
-                            if ((route.getDefinition().getOrigin().compareTo(originRouteLocation) == 0 ||
+                            if ((route.getDefinition().getOrigin().equals(originRouteLocation) ||
                                     route.getDefinition().getWaypoints().contains(originRouteLocation)) &&
-                                    (route.getDefinition().getDestination().compareTo(destinationRouteLocation) == 0 ||
+                                    (route.getDefinition().getDestination().equals(destinationRouteLocation) ||
                                             route.getDefinition().getWaypoints().contains(destinationRouteLocation))) {
                                 matchingRoutesSet.add(route);
                             }
@@ -346,17 +380,29 @@ public class RouteServiceImpl implements RouteService {
         return routeDtos;
     }
 
+    private RouteDto updateCommunicationRequest(CommunicationRequest communicationRequest) {
+        Route routeToUpdate = routeRepository.findRouteById(communicationRequest.getRouteId());
+        routeToUpdate.getCommunicationRequests().forEach(request -> {
+            if (request.getId().equals(communicationRequest.getId())) {
+                routeToUpdate.getCommunicationRequests().set(routeToUpdate.getCommunicationRequests().indexOf(request),communicationRequest);
+                log.info("UPDATED: communication request " + request.getId() + " in route " + routeToUpdate.getId());
+                checkCommunicationRequestStatusAndHandle(routeToUpdate, communicationRequest);
+            }
+        });
+        return new RouteDto(routeToUpdate);
+    }
+
     private void checkCommunicationRequestStatusAndHandle(Route route, CommunicationRequest request) {
         try {
             switch (request.getRequestStatus()) {
                 case IN_PROGRESS:
                     break;
                 case ACCEPTED:
-                    addPassengersToRouteAndUpdateAvailablePassengers(route, request.getUserId());
+                    addPassengersToRouteAndUpdateAvailablePassengers(route, request.getUser());
                     addWaypointsToRoute(route, request.getOrigin(), request.getDestination());
                     break;
                 case DECLINED:
-                    deletePassengersFromRouteAndUpdateAvailablePassengers(route, request.getUserId());
+                    deletePassengersFromRouteAndUpdateAvailablePassengers(route, request.getUser().getId());
                     deleteWaypointsFromRoute(route, request.getId(), request.getOrigin(), request.getDestination());
                     break;
             }
@@ -366,24 +412,19 @@ public class RouteServiceImpl implements RouteService {
         }
     }
 
+    private void addPassengersToRouteAndUpdateAvailablePassengers(Route route, RouteUser user) throws RouteServiceException {
+        if (route.getAvailablePassengers() > 0 && !route.getPassengers().contains(user)) {
+            route.getPassengers().add(user);
+            route.setAvailablePassengers(route.getAvailablePassengers() - 1);
+        }
+    }
+
     private void deletePassengersFromRouteAndUpdateAvailablePassengers(Route route, String userId) {
         int passengersBeforeDeleteCall = route.getPassengers().size();
         route.getPassengers().removeIf(routeUser -> routeUser.getId().equals(userId));
         if (route.getPassengers().size() != passengersBeforeDeleteCall) {
             route.setAvailablePassengers(route.getAvailablePassengers() + 1);
         }
-    }
-
-    private void addPassengersToRouteAndUpdateAvailablePassengers(Route route, String userId) throws RouteServiceException {
-        /*try {
-            RouteUser routeUser = new RouteUser(userService.findUserById(userId));
-            if (route.getAvailablePassengers() > 0 && !route.getPassengers().contains(routeUser)) {
-                route.getPassengers().add(routeUser);
-                route.setAvailablePassengers(route.getAvailablePassengers() - 1);
-            }
-        } catch (UserServiceException e) {
-            throw new RouteServiceException("Could not find the user in the database", e);
-        }*/
     }
 
     private void addWaypointsToRoute(Route route, RouteLocation wp1, RouteLocation wp2) {

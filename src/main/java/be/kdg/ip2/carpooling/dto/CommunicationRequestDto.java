@@ -6,21 +6,22 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class CommunicationRequestDto {
     private String id;
     private String routeId;
-    private String userId;
+    private RouteUserDto user;
     private RouteLocationDto origin;
     private RouteLocationDto destination;
     private String comment;
     private CommunicationRequestStatus requestStatus;
 
-    public CommunicationRequestDto(String routeId, String userId, RouteLocationDto origin, RouteLocationDto destination, String comment, CommunicationRequestStatus requestStatus) {
+    public CommunicationRequestDto(String routeId, RouteUserDto user, RouteLocationDto origin, RouteLocationDto destination, String comment, CommunicationRequestStatus requestStatus) {
         this.routeId = routeId;
-        this.userId = userId;
+        this.user = user;
         this.origin = origin;
         this.destination = destination;
         this.comment = comment;
@@ -30,7 +31,7 @@ public class CommunicationRequestDto {
     public CommunicationRequestDto(CommunicationRequest request) {
         this.id = request.getId();
         this.routeId = request.getRouteId();
-        this.userId = request.getUserId();
+        this.user = new RouteUserDto(request.getUser());
         this.origin = new RouteLocationDto(request.getOrigin().getLocationName(), request.getOrigin().getLocation().getX(), request.getOrigin().getLocation().getY());
         this.destination = new RouteLocationDto(request.getDestination().getLocationName(), request.getDestination().getLocation().getX(), request.getDestination().getLocation().getY());
         this.comment = request.getComment();

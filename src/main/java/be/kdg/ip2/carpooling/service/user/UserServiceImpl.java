@@ -51,18 +51,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto addUserAsDto(UserDto user) throws UserServiceException {
+        return new UserDto(saveWithCheck(new User(user)));
+    }
+
+    @Override
     public User addUser(User user) throws UserServiceException {
         return saveWithCheck(user);
     }
 
     @Override
     public User updateUser(UserDto user) throws UserServiceException {
-        return userRepository.save(new User(user));
+        User userToUpdate = new User(user);
+        if (userRepository.findUserById(userToUpdate.getId()).equals(userToUpdate)) {
+            return null;
+        } else {
+            return userRepository.save(userToUpdate);
+        }
+    }
+
+    @Override
+    public UserDto updateUserAsDto(UserDto user) throws UserServiceException {
+        User userToUpdate = new User(user);
+        if (userRepository.findUserById(userToUpdate.getId()).equals(userToUpdate)) {
+            return null;
+        } else {
+            return new UserDto(userRepository.save(userToUpdate));
+        }
     }
 
     @Override
     public User updateUser(User user) throws UserServiceException {
-        return userRepository.save(user);
+        if (userRepository.findUserById(user.getId()).equals(user)) {
+            return null;
+        } else {
+            return userRepository.save(user);
+        }
     }
 
     @Override
@@ -88,14 +112,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findByStreet(String street) throws UserServiceException {
-        /*QUser qUser = new QUser("user");
-        BooleanExpression filterByStreet = qUser.address.street.eq(street);
-        List<User> all = (List<User>) userRepository.findAll(filterByStreet);
-        log.info(all.toString());*/
-
         List<User> all2 = userRepository.findUsersByAddress_Street(street);
         log.info(all2.toString());
-
         return all2;
     }
 

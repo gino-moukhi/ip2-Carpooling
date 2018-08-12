@@ -4,7 +4,6 @@ import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.communication.CommunicationRequestStatus;
 import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
 import be.kdg.ip2.carpooling.repository.communication.CommunicationRepository;
-import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.util.DecimalUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +20,10 @@ public class CommunicationServiceImpl implements CommunicationService {
     }
 
     private CommunicationRepository communicationRepository;
-    //private RouteService routeService;
 
     @Autowired
-    public CommunicationServiceImpl(CommunicationRepository communicationRepository/*, RouteService routeService*/) {
+    public CommunicationServiceImpl(CommunicationRepository communicationRepository) {
         this.communicationRepository = communicationRepository;
-        //this.routeService = routeService;
     }
 
     @Override
@@ -61,7 +58,7 @@ public class CommunicationServiceImpl implements CommunicationService {
 
     @Override
     public List<CommunicationRequest> findCommunicationRequestsByUserId(String userId) {
-        return communicationRepository.findCommunicationRequestsByUserId(userId);
+        return communicationRepository.findCommunicationRequestsByUser_Id(userId);
     }
 
     @Override
@@ -71,7 +68,7 @@ public class CommunicationServiceImpl implements CommunicationService {
 
     @Override
     public List<CommunicationRequest> findCommunicationRequestByRouteIdAndUserId(String routeId, String userId) {
-        return communicationRepository.findCommunicationRequestByRouteIdAndUserId(routeId, userId);
+        return communicationRepository.findCommunicationRequestsByRouteIdAndUser_Id(routeId, userId);
     }
 
     @Override
@@ -101,7 +98,7 @@ public class CommunicationServiceImpl implements CommunicationService {
 
     @Override
     public List<CommunicationRequest> findCommunicationRequestsByUserIdAndRequestStatus(String userId, CommunicationRequestStatus status) {
-        return communicationRepository.findCommunicationRequestsByUserIdAndRequestStatus(userId, status);
+        return communicationRepository.findCommunicationRequestsByUser_IdAndRequestStatus(userId, status);
     }
 
     @Override
@@ -111,72 +108,69 @@ public class CommunicationServiceImpl implements CommunicationService {
 
     @Override
     public CommunicationRequest findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(String routId, String userId, CommunicationRequestStatus status) {
-        return communicationRepository.findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(routId, userId, status);
+        return communicationRepository.findCommunicationRequestsByRouteIdAndUser_IdAndRequestStatus(routId, userId, status);
     }
 
     @Override
     public CommunicationRequestDto findCommunicationRequestsByRouteIdAndUserIdAndRequestStatusAsDto(String routId, String userId, CommunicationRequestStatus status) {
-        return new CommunicationRequestDto(communicationRepository.findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(routId, userId, status));
+        return new CommunicationRequestDto(communicationRepository.findCommunicationRequestsByRouteIdAndUser_IdAndRequestStatus(routId, userId, status));
     }
 
     @Override
-    public void addCommunicationRequest(CommunicationRequest request) {
-        CommunicationRequest communicationRequest = saveWithCheck(request);
-        //routeService.addCommunicationRequestToRoute(communicationRequest);
+    public CommunicationRequest addCommunicationRequest(CommunicationRequest request) {
+        request.getOrigin().setLocation(DecimalUtil.roundPoint(request.getOrigin().getLocation()));
+        request.getDestination().setLocation(DecimalUtil.roundPoint(request.getDestination().getLocation()));
+        return saveWithCheck(request);
     }
 
     @Override
-    public void addCommunicationRequest(CommunicationRequestDto request) {
+    public CommunicationRequest addCommunicationRequest(CommunicationRequestDto request) {
         CommunicationRequest communicationRequest = new CommunicationRequest(request);
         communicationRequest.getOrigin().setLocation(DecimalUtil.roundPoint(communicationRequest.getOrigin().getLocation()));
         communicationRequest.getDestination().setLocation(DecimalUtil.roundPoint(communicationRequest.getDestination().getLocation()));
-        CommunicationRequest savedRequest = saveWithCheck(communicationRequest);
-        //routeService.addCommunicationRequestToRoute(savedRequest);
+        return saveWithCheck(communicationRequest);
     }
 
     @Override
-    public void updateCommunicationRequest(CommunicationRequest request) {
-        CommunicationRequest communicationRequest = communicationRepository.save(request);
-        //routeService.updateCommunicationRequestOfRoute(communicationRequest);
+    public CommunicationRequest updateCommunicationRequest(CommunicationRequest request) {
+        return checkIfUpdated(request);
     }
 
     @Override
-    public void updateCommunicationRequest(CommunicationRequestDto request) {
-        CommunicationRequest communicationRequest = communicationRepository.save(new CommunicationRequest(request));
-        //routeService.updateCommunicationRequestOfRoute(communicationRequest);
+    public CommunicationRequest updateCommunicationRequest(CommunicationRequestDto request) {
+        CommunicationRequest communicationRequest = new CommunicationRequest(request);
+        return checkIfUpdated(communicationRequest);
     }
 
     @Override
-    public void updateCommunicationRequestStatus(String id, CommunicationRequestStatus status) {
+    public CommunicationRequest updateCommunicationRequestStatus(String id, CommunicationRequestStatus status) {
         CommunicationRequest found = communicationRepository.findCommunicationRequestById(id);
-        found.setRequestStatus(status);
-        CommunicationRequest communicationRequest = communicationRepository.save(found);
-        //routeService.updateCommunicationRequestOfRoute(communicationRequest);
-        //routeService.updateCommunicationRequestStatusOfRoute(communicationRequest.getRouteId(), communicationRequest.getId(), communicationRequest.getRequestStatus());
+        if (found.getRequestStatus().equals(status)) {
+            return null;
+        } else {
+            found.setRequestStatus(status);
+            return communicationRepository.save(found);
+        }
     }
 
     @Override
     public void deleteCommunicationRequestById(String id) {
-        CommunicationRequest requestToDelete = communicationRepository.findCommunicationRequestById(id);
-        //routeService.deleteCommunicationRequestOfRoute(requestToDelete.getRouteId(), requestToDelete.getId());
-        communicationRepository.deleteById(requestToDelete.getId());
+        communicationRepository.deleteById(id);
     }
 
     @Override
-    public void deleteCommunicationRequestByRouteId(String routeId) {
+    public void deleteCommunicationRequestsByRouteId(String routeId) {
         List<CommunicationRequest> requestsToDelete = communicationRepository.findCommunicationRequestsByRouteId(routeId);
         requestsToDelete.forEach(request -> communicationRepository.deleteById(request.getId()));
     }
 
     @Override
     public void deleteAll() {
-        List<CommunicationRequest> all = communicationRepository.findAll();
-        //all.forEach(request -> routeService.deleteCommunicationRequestOfRoute(request.getRouteId(), request.getId()));
         communicationRepository.deleteAll();
     }
 
     private CommunicationRequest saveWithCheck(CommunicationRequest request) {
-        CommunicationRequest foundRequest = findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(request.getRouteId(), request.getUserId(), request.getRequestStatus());
+        CommunicationRequest foundRequest = findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(request.getRouteId(), request.getUser().getId(), request.getRequestStatus());
         if (foundRequest != null) {
             request.setId(foundRequest.getId());
         }
@@ -184,12 +178,6 @@ public class CommunicationServiceImpl implements CommunicationService {
     }
 
     private List<CommunicationRequestDto> findAllDto(MethodName methodName, @Nullable String routeId, @Nullable String userId, @Nullable CommunicationRequestStatus status) {
-        //ORIGINAL CODE
-        /*List<CommunicationRequest> all = communicationRepository.findAll();
-        List<CommunicationRequestDto> allDto = new ArrayList<>();
-        all.forEach(request -> allDto.add(new CommunicationRequestDto(request)));
-        return allDto;*/
-
         List<CommunicationRequest> all = new ArrayList<>();
         switch (methodName) {
             case FIND_ALL:
@@ -199,10 +187,10 @@ public class CommunicationServiceImpl implements CommunicationService {
                 all = communicationRepository.findCommunicationRequestsByRouteId(routeId);
                 break;
             case FIND_BY_USERID:
-                all = communicationRepository.findCommunicationRequestsByUserId(routeId);
+                all = communicationRepository.findCommunicationRequestsByUser_Id(userId);
                 break;
             case FIND_BY_ROUTEID_USERID:
-                all = communicationRepository.findCommunicationRequestByRouteIdAndUserId(routeId, userId);
+                all = communicationRepository.findCommunicationRequestsByRouteIdAndUser_Id(routeId, userId);
                 break;
             case FIND_BY_STATUS:
                 all = communicationRepository.findCommunicationRequestsByRequestStatus(status);
@@ -211,7 +199,7 @@ public class CommunicationServiceImpl implements CommunicationService {
                 all = communicationRepository.findCommunicationRequestsByRouteIdAndRequestStatus(routeId, status);
                 break;
             case FIND_BY_USERID_STATUS:
-                all = communicationRepository.findCommunicationRequestsByUserIdAndRequestStatus(userId, status);
+                all = communicationRepository.findCommunicationRequestsByUser_IdAndRequestStatus(userId, status);
                 break;
         }
         List<CommunicationRequestDto> allDto = new ArrayList<>();
@@ -219,5 +207,13 @@ public class CommunicationServiceImpl implements CommunicationService {
         return allDto;
     }
 
-
+    private CommunicationRequest checkIfUpdated(CommunicationRequest request) {
+        if (communicationRepository.findCommunicationRequestById(request.getId()).equals(request)) {
+            return null;
+        } else {
+            request.getOrigin().setLocation(DecimalUtil.roundPoint(request.getOrigin().getLocation()));
+            request.getDestination().setLocation(DecimalUtil.roundPoint(request.getDestination().getLocation()));
+            return communicationRepository.save(request);
+        }
+    }
 }

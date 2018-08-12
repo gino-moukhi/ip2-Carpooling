@@ -1,13 +1,15 @@
 package be.kdg.ip2.carpooling.controller;
 
+import be.kdg.ip2.carpooling.domain.user.RouteUser;
 import be.kdg.ip2.carpooling.domain.user.User;
 import be.kdg.ip2.carpooling.dto.UserDto;
+import be.kdg.ip2.carpooling.service.route.RouteService;
+import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 import be.kdg.ip2.carpooling.service.user.UserService;
 import be.kdg.ip2.carpooling.service.user.UserServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
@@ -15,10 +17,12 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private UserService userService;
+    private RouteService routeService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RouteService routeService) {
         this.userService = userService;
+        this.routeService = routeService;
     }
 
     @GetMapping("/all")
@@ -26,14 +30,25 @@ public class UserController {
         return userService.findAllUsers();
     }
 
+    @GetMapping("/{id}")
+    public UserDto getById(@PathVariable("id")String id) throws UserServiceException {
+        return userService.findUserDtoById(id);
+    }
+
     @PostMapping
-    public User insert(@RequestBody UserDto user) throws UserServiceException {
-        return userService.addUser(user);
+    public UserDto insert(@RequestBody UserDto user) throws UserServiceException {
+        return userService.addUserAsDto(user);
     }
 
     @PutMapping
-    public User update(@RequestBody UserDto user) throws UserServiceException {
-        return userService.updateUser(user);
+    public UserDto update(@RequestBody UserDto user) throws UserServiceException, RouteServiceException {
+        User updatedUser = userService.updateUser(user);
+        if (updatedUser != null) {
+            routeService.updateUsersOfRoute(new RouteUser(updatedUser));
+            return new UserDto(updatedUser);
+        } else {
+            return new UserDto(userService.findUserById(user.getId()));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -43,55 +58,5 @@ public class UserController {
         } catch (UserServiceException e) {
             e.printStackTrace();
         }
-    }
-
-    @GetMapping("/{id}")
-    public UserDto getById(@PathVariable("id")String id) throws UserServiceException {
-        return userService.findUserDtoById(id);
-    }
-
-    // ALL FOLOWING METHODS ARE NOT USED, THEY ARE JUST AN EXAMPLE
-    @GetMapping("/age/{age}")
-    public List<User> getByMaxAge(@PathVariable("age")int max) {
-        List<User> foundUsers = new ArrayList<>();
-        try {
-            foundUsers = userService.findUserByAgelessThan(max);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
-        return foundUsers;
-    }
-
-    @GetMapping("/address/city/{city}")
-    public List<User> getByCity(@PathVariable("city")String city) {
-        List<User> foundUsers = new ArrayList<>();
-        try {
-            foundUsers = userService.findByCity(city);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
-        return foundUsers;
-    }
-
-    @GetMapping("/address/street/{street}")
-    public List<User> getByStreetname(@PathVariable("street")String street) {
-        List<User> foundUsers = new ArrayList<>();
-        try {
-            foundUsers = userService.findByStreet(street);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
-        return foundUsers;
-    }
-
-    @GetMapping("/recommended/{city}/{passengers}")
-    public List<User> getRecommended(@PathVariable("city")String city,@PathVariable("passengers")int passengers) {
-        List<User> foundUsers = new ArrayList<>();
-        try {
-            foundUsers = userService.findClosestWithEnoughSpace(city,passengers);
-        } catch (UserServiceException e) {
-            e.printStackTrace();
-        }
-        return foundUsers;
     }
 }

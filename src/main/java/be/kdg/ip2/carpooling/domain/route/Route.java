@@ -4,10 +4,7 @@ import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.user.RouteUser;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import be.kdg.ip2.carpooling.dto.RouteDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,8 +16,9 @@ import java.util.List;
 @Document(collection = "routes")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class Route implements Comparable<Route> {
     @Id
     private String id;
@@ -83,47 +81,6 @@ public class Route implements Comparable<Route> {
 
     @Override
     public int compareTo(Route r) {
-        int i;
-        if (id == null && r.getId() == null) {
-            i = 0;
-        } else if (id.isEmpty() && r.getId().isEmpty()) {
-            i = 0;
-        } else {
-            i = id.compareTo(r.id);
-        }
-        if (i != 0) return i;
-        i = definition.compareTo(r.getDefinition());
-        if (i != 0) return i;
-        i = vehicleType.equals(r.getVehicleType()) ? 0 : -1;
-        if (i != 0) return i;
-        i = departure.compareTo(r.departure);
-        if (i != 0) return -1;
-        i = Integer.compare(availablePassengers, r.getAvailablePassengers());
-        if (i != 0) return i;
-        i = owner.compareTo(r.getOwner());
-        if (i != 0) return i;
-        if (passengers.isEmpty() && r.getPassengers().isEmpty()) {
-            return 0;
-        } else {
-            if (passengers.size() == r.getPassengers().size()) {
-                for (int j = 0; j < passengers.size(); j++) {
-                    i = passengers.get(j).compareTo(r.getPassengers().get(j));
-                    if (i != 0) return i;
-                }
-            } else return -1;
-        }
-        if (communicationRequests == null) communicationRequests = new ArrayList<>();
-        if (r.getCommunicationRequests() == null) r.setCommunicationRequests(new ArrayList<>());
-        if (communicationRequests.isEmpty() && r.getCommunicationRequests().isEmpty()) {
-            return 0;
-        } else {
-            if (communicationRequests.size() == r.getCommunicationRequests().size()) {
-                for (int j = 0; j < communicationRequests.size(); j++) {
-                    i = communicationRequests.get(j).compareTo(r.getCommunicationRequests().get(j));
-                    if (i != 0) return i;
-                }
-            } else return -1;
-        }
-        return i;
+        return this.equals(r) ? 0 : -1;
     }
 }

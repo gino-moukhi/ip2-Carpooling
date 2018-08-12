@@ -7,9 +7,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class RouteDefinitionDto {
     private RouteLocationDto origin;
     private RouteLocationDto destination;

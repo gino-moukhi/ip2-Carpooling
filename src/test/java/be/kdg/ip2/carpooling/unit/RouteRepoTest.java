@@ -65,9 +65,9 @@ public class RouteRepoTest {
                 LocalDateTime.of(2018, 8, 6, 12, 55));
         List<Route> allFilteredRoutes = (List<Route>) repo.findAll(departureFilter);
         allFilteredRoutes.forEach(route -> {
-            if ((route.getDefinition().getOrigin().compareTo(rl2) == 0 ||
+            if ((route.getDefinition().getOrigin().equals(rl2) ||
                     route.getDefinition().getWaypoints().contains(rl2)) &&
-                    (route.getDefinition().getDestination().compareTo(rl3) == 0 ||
+                    (route.getDefinition().getDestination().equals(rl3) ||
                     route.getDefinition().getWaypoints().contains(rl3))) {
                 foundRoutes2.add(route);
             }

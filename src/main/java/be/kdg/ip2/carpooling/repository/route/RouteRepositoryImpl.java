@@ -6,14 +6,12 @@ import be.kdg.ip2.carpooling.domain.route.RouteLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -30,8 +28,6 @@ public class RouteRepositoryImpl implements CustomRouteRepository {
     public List<Route> findExistingRoutesFromPlaces(SourceType sourceType1, SourceType sourceType2, RouteLocation origin, RouteLocation destination) {
         Query query = new Query();
         if (sourceType1.equals(SourceType.WAYPOINT) && sourceType2.equals(SourceType.WAYPOINT)) {
-            /*query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(origin))
-                    .elemMatch(Criteria.where("location").is(destination)));*/
             query.addCriteria(Criteria.where("definition.waypoints").elemMatch(Criteria.where("location").is(origin.getLocation())));
             List<Route> waypointsThatMatchOrigin = mongoOperations.find(query, Route.class);
             query = new Query();
@@ -59,6 +55,13 @@ public class RouteRepositoryImpl implements CustomRouteRepository {
                 Criteria.where("owner._id").is(userId),
                 Criteria.where("passengers").elemMatch(Criteria.where("_id").is(userId))
         ));
+        return mongoOperations.find(query, Route.class);
+    }
+
+    @Override
+    public List<Route> findRoutesByCommunicationRequestUser(String userId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("communicationRequests").elemMatch(Criteria.where("user._id").is(userId)));
         return mongoOperations.find(query, Route.class);
     }
 

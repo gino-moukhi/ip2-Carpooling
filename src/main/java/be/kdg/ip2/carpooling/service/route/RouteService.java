@@ -11,11 +11,9 @@ import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface RouteService {
     List<Route> findAllRoutes() throws RouteServiceException;
 
@@ -29,9 +27,15 @@ public interface RouteService {
 
     Route addRoute(RouteDto routeDto) throws RouteServiceException;
 
-    void addCommunicationRequestToRoute(CommunicationRequest request);
+    RouteDto addRouteAsDto(RouteDto routeDto) throws RouteServiceException;
 
-    void updateCommunicationRequestOfRoute(CommunicationRequest request);
+    RouteDto addCommunicationRequestToRoute(CommunicationRequest request);
+
+    RouteDto addCommunicationRequestToRoute(CommunicationRequestDto request);
+
+    RouteDto updateCommunicationRequestOfRoute(CommunicationRequest request);
+
+    RouteDto updateCommunicationRequestOfRoute(CommunicationRequestDto requestDto);
 
     //void updateCommunicationRequestStatusOfRoute(String routeId, String communicationRequestId, CommunicationRequestStatus requestStatus);
 
@@ -39,7 +43,9 @@ public interface RouteService {
 
     Route updateRoute(RouteDto routeDto) throws RouteServiceException;
 
-    void updateUserOfRoute(RouteUser user) throws RouteServiceException;
+    RouteDto updateRouteAsDto(RouteDto routeDto) throws RouteServiceException;
+
+    void updateUsersOfRoute(RouteUser user) throws RouteServiceException;
 
     void addPassengerToRoute(String routeId, RouteUserDto routeUserDto) throws RouteServiceException;
 

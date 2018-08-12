@@ -1,6 +1,5 @@
 package be.kdg.ip2.carpooling.dto;
 
-import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.user.VehicleType;
 import lombok.*;
@@ -13,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class RouteDto {
     private String id;
     private RouteDefinitionDto routeDefinition;

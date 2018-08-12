@@ -1,11 +1,10 @@
 package be.kdg.ip2.carpooling.controller;
 
-import be.kdg.ip2.carpooling.domain.route.Route;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteria;
 import be.kdg.ip2.carpooling.domain.search.SearchCriteriaAcceptanceType;
-import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
 import be.kdg.ip2.carpooling.dto.RouteDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
+import be.kdg.ip2.carpooling.service.communication.CommunicationService;
 import be.kdg.ip2.carpooling.service.route.RouteService;
 import be.kdg.ip2.carpooling.service.route.RouteServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +24,12 @@ import java.util.List;
 @Slf4j
 public class RouteController {
     private RouteService routeService;
+    private CommunicationService communicationService;
 
     @Autowired
-    public RouteController(RouteService routeService) {
+    public RouteController(RouteService routeService, CommunicationService communicationService) {
         this.routeService = routeService;
+        this.communicationService = communicationService;
     }
 
     @GetMapping("/all")
@@ -42,17 +43,17 @@ public class RouteController {
     }
 
     @PostMapping
-    public Route insert(@RequestBody RouteDto dto) throws RouteServiceException {
-        return routeService.addRoute(dto);
+    public RouteDto insert(@RequestBody RouteDto dto) throws RouteServiceException {
+        return routeService.addRouteAsDto(dto);
     }
 
     @PutMapping
-    public Route update(@RequestBody RouteDto route) throws RouteServiceException {
-        return routeService.updateRoute(route);
+    public RouteDto update(@RequestBody RouteDto route) throws RouteServiceException {
+        return routeService.updateRouteAsDto(route);
     }
 
     @PutMapping("/route/passenger")
-    public Route addPassengerToRoute(@RequestParam String routeId, @RequestBody RouteUserDto routeUserDto) throws RouteServiceException {
+    public RouteDto addPassengerToRoute(@RequestParam String routeId, @RequestBody RouteUserDto routeUserDto) throws RouteServiceException {
         // USE THE COMMUNICATION REQUEST FOR THE ADDING AND REMOVING OF PASSENGERS
         //return routeService.addPassengerToRoute(routeId, routeUserDto);
         return null;
@@ -61,11 +62,13 @@ public class RouteController {
     @DeleteMapping
     public void deleteAll() {
         routeService.deleteAll();
+        communicationService.deleteAll();
     }
 
     @DeleteMapping("/{id}")
     public void deleteAll(@PathVariable("id") String id) throws RouteServiceException {
         routeService.deleteRouteById(id);
+        communicationService.deleteCommunicationRequestsByRouteId(id);
     }
 
     @GetMapping("/myRoutes")

@@ -14,15 +14,15 @@ public interface CommunicationRepository extends MongoRepository<CommunicationRe
 
     List<CommunicationRequest> findCommunicationRequestsByRouteId(String routeId);
 
-    List<CommunicationRequest> findCommunicationRequestsByUserId(String userId);
+    List<CommunicationRequest> findCommunicationRequestsByUser_Id(String userId);
 
-    List<CommunicationRequest> findCommunicationRequestByRouteIdAndUserId(String routeId, String userId);
+    List<CommunicationRequest> findCommunicationRequestsByRouteIdAndUser_Id(String routeId, String userId);
 
     List<CommunicationRequest> findCommunicationRequestsByRequestStatus(CommunicationRequestStatus status);
 
     List<CommunicationRequest> findCommunicationRequestsByRouteIdAndRequestStatus(String routeId, CommunicationRequestStatus status);
 
-    List<CommunicationRequest> findCommunicationRequestsByUserIdAndRequestStatus(String userId, CommunicationRequestStatus status);
+    List<CommunicationRequest> findCommunicationRequestsByUser_IdAndRequestStatus(String userId, CommunicationRequestStatus status);
 
-    CommunicationRequest findCommunicationRequestsByRouteIdAndUserIdAndRequestStatus(String routId,String userId, CommunicationRequestStatus status);
+    CommunicationRequest findCommunicationRequestsByRouteIdAndUser_IdAndRequestStatus(String routeId, String userId, CommunicationRequestStatus status);
 }

@@ -2,36 +2,28 @@ package be.kdg.ip2.carpooling.domain.route;
 
 import lombok.*;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
-
-import java.util.Arrays;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class RouteLocation implements Comparable<RouteLocation> {
     private String locationName;
     private Point location;
 
     @Override
     public boolean equals(Object obj) {
-        boolean equals = super.equals(obj);
-        int i = this.compareTo((RouteLocation) obj);
-        equals = i == 0;
-        return equals;
+        super.equals(obj);
+        int i;
+        i = Double.compare(location.getX(), ((RouteLocation) obj).getLocation().getX());
+        if (i != 0) return false;
+        i = Double.compare(location.getY(), ((RouteLocation) obj).getLocation().getY());
+        return i == 0;
     }
 
     @Override
     public int compareTo(RouteLocation rl) {
-        int i;
-        /*i = locationName.compareTo(rl.getLocationName());
-        if (i != 0) return i;*/
-        i = Double.compare(location.getX(), rl.getLocation().getX());
-        if (i != 0) return i;
-        i = Double.compare(location.getY(), rl.getLocation().getY());
-        if (i != 0) return i;
-        return i;
+        return this.equals(rl) ? 0 : -1;
     }
 }

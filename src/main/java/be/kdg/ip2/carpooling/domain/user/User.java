@@ -1,10 +1,7 @@
 package be.kdg.ip2.carpooling.domain.user;
 
 import be.kdg.ip2.carpooling.dto.UserDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class User {
     @Id
     private String id;

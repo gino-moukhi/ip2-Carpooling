@@ -3,7 +3,6 @@ package be.kdg.ip2.carpooling.service.communication;
 import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.communication.CommunicationRequestStatus;
 import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -44,19 +43,19 @@ public interface CommunicationService {
 
     CommunicationRequestDto findCommunicationRequestsByRouteIdAndUserIdAndRequestStatusAsDto(String routId, String userId, CommunicationRequestStatus status);
 
-    void addCommunicationRequest(CommunicationRequest request);
+    CommunicationRequest addCommunicationRequest(CommunicationRequest request);
 
-    void addCommunicationRequest(CommunicationRequestDto request);
+    CommunicationRequest addCommunicationRequest(CommunicationRequestDto request);
 
-    void updateCommunicationRequest(CommunicationRequest request);
+    CommunicationRequest updateCommunicationRequest(CommunicationRequest request);
 
-    void updateCommunicationRequest(CommunicationRequestDto request);
+    CommunicationRequest updateCommunicationRequest(CommunicationRequestDto request);
 
-    void updateCommunicationRequestStatus(String id, CommunicationRequestStatus status);
+    CommunicationRequest updateCommunicationRequestStatus(String id, CommunicationRequestStatus status);
 
     void deleteCommunicationRequestById(String id);
 
-    void deleteCommunicationRequestByRouteId(String routeId);
+    void deleteCommunicationRequestsByRouteId(String routeId);
 
     void deleteAll();
 }

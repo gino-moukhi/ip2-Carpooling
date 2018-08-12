@@ -4,9 +4,10 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class RouteLocationDto {
     private String name;
     private double lat;

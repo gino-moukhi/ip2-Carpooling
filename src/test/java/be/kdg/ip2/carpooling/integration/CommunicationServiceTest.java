@@ -2,10 +2,7 @@ package be.kdg.ip2.carpooling.integration;
 
 import be.kdg.ip2.carpooling.domain.communication.CommunicationRequest;
 import be.kdg.ip2.carpooling.domain.communication.CommunicationRequestStatus;
-import be.kdg.ip2.carpooling.domain.route.Route;
-import be.kdg.ip2.carpooling.domain.user.Gender;
-import be.kdg.ip2.carpooling.domain.user.Name;
-import be.kdg.ip2.carpooling.domain.user.Vehicle;
+import be.kdg.ip2.carpooling.domain.user.*;
 import be.kdg.ip2.carpooling.dto.CommunicationRequestDto;
 import be.kdg.ip2.carpooling.dto.RouteLocationDto;
 import be.kdg.ip2.carpooling.dto.RouteUserDto;
@@ -42,8 +39,10 @@ public class CommunicationServiceTest {
         RouteLocationDto origin = new RouteLocationDto("Paalstraat, 2900 Schoten, België", 51.257071, 4.504916);
         RouteLocationDto destination = new RouteLocationDto("Tweegezusterslaan 82, 2100 Antwerpen, België", 51.227694, 4.476514);
         String sophieId = "5b534318d3303d2c7090d940";
+        RouteUserDto sophie = new RouteUserDto(sophieId, "sophie.kotton@gmail.com", new Name("Sophie", "Kotton"),
+                27, Gender.FEMALE, true, new Vehicle("Toyota", VehicleType.HATCHBACK, 5.2, 3));
         String comment = "I work at \"Frietworld\", if you drop me off, I'll buy you some fries";
-        CommunicationRequestDto request = new CommunicationRequestDto(routeId, sophieId, origin, destination, comment, CommunicationRequestStatus.IN_PROGRESS);
+        CommunicationRequestDto request = new CommunicationRequestDto(routeId, sophie, origin, destination, comment, CommunicationRequestStatus.IN_PROGRESS);
         communicationService.addCommunicationRequest(request);
     }
 
@@ -56,8 +55,10 @@ public class CommunicationServiceTest {
         RouteLocationDto origin = new RouteLocationDto("Eikenlei 10, 2960 Sint-Job-in-'t-Goor, België", 51.303693, 4.566765);
         RouteLocationDto destination = new RouteLocationDto("Parking Het Ven, 2900 Schoten, België", 51.251999, 4.502031);
         String ginoId = "5b534318d3303d2c7090d93e";
+        RouteUserDto gino = new RouteUserDto(ginoId, "gino.moukhi@student.kdg.be", new Name("Gino", "Moukhi"),
+                21, Gender.MALE, false, new Vehicle("Mercedes", VehicleType.SEDAN, 4.2, 3));
         String comment = "I just need to be somewhere close to that parking location";
-        CommunicationRequestDto request = new CommunicationRequestDto(routeId, ginoId, origin, destination, comment, CommunicationRequestStatus.IN_PROGRESS);
+        CommunicationRequestDto request = new CommunicationRequestDto(routeId, gino, origin, destination, comment, CommunicationRequestStatus.IN_PROGRESS);
         communicationService.addCommunicationRequest(request);
         all = communicationService.findAll();
         assertThat(all.size(), equalTo(2));

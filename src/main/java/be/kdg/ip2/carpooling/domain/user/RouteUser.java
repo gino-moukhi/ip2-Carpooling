@@ -11,7 +11,8 @@ import java.util.Comparator;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class RouteUser implements Comparable<RouteUser> {
+@EqualsAndHashCode
+public class RouteUser implements Comparable<User>{
     private String id;
     private String email;
     private Name name;
@@ -60,30 +61,29 @@ public class RouteUser implements Comparable<RouteUser> {
     }
 
     @Override
-    public int compareTo(RouteUser ru) {
+    public int compareTo(User u) {
         int i;
-        if (id == null && ru.getId() == null) {
-            i = 0;
-        } else if (id.isEmpty() && ru.getId().isEmpty()) {
-            i = 0;
+        boolean same;
+        if (id == null && u.getId() == null) {
+            same = true;
+        } else if (id.isEmpty() && u.getId().isEmpty()) {
+            same = true;
         } else {
-            i = id.compareTo(ru.id);
+            same = this.id.equals(u.getId());
         }
-        if (i != 0) return i;
-        i = email.compareTo(ru.getEmail());
-        if (i != 0) return i;
-        i = name.getFirstName().compareTo(ru.getName().getFirstName());
-        if (i != 0) return i;
-        i = name.getLastName().compareTo(ru.getName().getLastName());
-        if (i != 0) return i;
-        i = Integer.compare(age, ru.getAge());
-        if (i != 0) return i;
-        i = gender.compareTo(ru.getGender());
-        if (i != 0) return i;
-        i = isSmoker() == ru.isSmoker() ? 0 : -1;
-        if (i != 0) return i;
-        i = vehicle.compareTo(ru.getVehicle());
-        if (i != 0) return i;
-        return i;
+        if (!same) return -1;
+        same = this.email.equals(u.getEmail());
+        if (!same) return -1;
+        same = this.name.equals(u.getName());
+        if (!same) return -1;
+        i = Integer.compare(this.age, u.getAge());
+        if (i != 0) return -1;
+        same = this.gender.equals(u.getGender());
+        if (!same) return -1;
+        i = Boolean.compare(this.smoker,u.isSmoker());
+        if (i != 0) return -1;
+        same = this.vehicle.equals(u.getVehicle());
+        if (!same) return -1;
+        return 0;
     }
 }
