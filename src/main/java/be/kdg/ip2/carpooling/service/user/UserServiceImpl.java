@@ -7,6 +7,7 @@ import be.kdg.ip2.carpooling.repository.user.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,10 +17,12 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private BCryptPasswordEncoder encoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.encoder = encoder;
     }
 
     @Override
@@ -130,6 +133,7 @@ public class UserServiceImpl implements UserService {
         if (foundUser != null) {
             user.setId(foundUser.getId());
         }
+        user.setPassword(encoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 }
