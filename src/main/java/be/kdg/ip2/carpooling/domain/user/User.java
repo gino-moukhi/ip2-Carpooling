@@ -5,6 +5,9 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "users")
 @Getter
 @Setter
@@ -22,6 +25,7 @@ public class User {
     private Gender gender;
     private boolean smoker;
     private Vehicle vehicle;
+    private List<Role> roles;
 
     public User(String email, String password, Name name, Address address, int age, Gender gender, boolean smoker, Vehicle vehicle) {
         this.email = email;
@@ -32,6 +36,7 @@ public class User {
         this.gender = gender;
         this.smoker = smoker;
         this.vehicle = vehicle;
+        this.roles = new ArrayList<>();
     }
 
     public User(UserDto userDto) {
@@ -44,5 +49,6 @@ public class User {
         this.gender = userDto.getGender();
         this.smoker = userDto.isSmoker();
         this.vehicle = userDto.getVehicle();
+        this.roles = new ArrayList<>();
     }
 }

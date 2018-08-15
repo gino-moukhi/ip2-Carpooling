@@ -1,11 +1,19 @@
 package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.User;
+import be.kdg.ip2.carpooling.dto.LoginUserDto;
 import be.kdg.ip2.carpooling.dto.UserDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService {
+    LoginUserDto signIn(LoginUserDto loginUser);
+
+    String signUp(User user);
+
+    User whoami(HttpServletRequest req);
+
     User findUserById(String id) throws UserServiceException;
 
     UserDto findUserDtoById(String id) throws UserServiceException;

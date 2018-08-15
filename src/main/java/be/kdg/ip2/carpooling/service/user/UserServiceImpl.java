@@ -2,14 +2,22 @@ package be.kdg.ip2.carpooling.service.user;
 
 import be.kdg.ip2.carpooling.domain.user.QUser;
 import be.kdg.ip2.carpooling.domain.user.User;
+import be.kdg.ip2.carpooling.dto.LoginUserDto;
 import be.kdg.ip2.carpooling.dto.UserDto;
 import be.kdg.ip2.carpooling.repository.user.UserRepository;
+import be.kdg.ip2.carpooling.security.CustomException;
+import be.kdg.ip2.carpooling.security.JwtTokenProvider;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +25,41 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
-    private BCryptPasswordEncoder encoder;
+    private PasswordEncoder encoder;
+    private JwtTokenProvider tokenProvider;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder encoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder, JwtTokenProvider tokenProvider, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.encoder = encoder;
+        this.tokenProvider = tokenProvider;
+        this.authenticationManager = authenticationManager;
+    }
+
+    public LoginUserDto signIn(LoginUserDto loginUser) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword()));
+            User foundUser = userRepository.findUserByEmail(loginUser.getUsername());
+            String token = tokenProvider.createToken(loginUser.getUsername(), foundUser.getRoles());
+            return new LoginUserDto(foundUser.getId(), foundUser.getEmail(), foundUser.getPassword(), token);
+        } catch (AuthenticationException e) {
+            throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public String signUp(User user) {
+        if (userRepository.findUserByEmail(user.getEmail()) == null) {
+            user.setPassword(encoder.encode(user.getPassword()));
+            userRepository.save(user);
+            return tokenProvider.createToken(user.getEmail(), user.getRoles());
+        } else {
+            throw new CustomException("Username is already in use", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public User whoami(HttpServletRequest req) {
+        return userRepository.findUserByEmail(tokenProvider.getUsername(tokenProvider.resolveToken(req)));
     }
 
     @Override

@@ -8,11 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class CarpoolingApplication {
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     public static void main(String[] args) {
         SpringApplication.run(CarpoolingApplication.class, args);
     }
