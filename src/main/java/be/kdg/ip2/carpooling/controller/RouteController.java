@@ -66,7 +66,7 @@ public class RouteController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAll(@PathVariable("id") String id) throws RouteServiceException {
+    public void deleteById(@PathVariable("id") String id) throws RouteServiceException {
         routeService.deleteRouteById(id);
         communicationService.deleteCommunicationRequestsByRouteId(id);
     }

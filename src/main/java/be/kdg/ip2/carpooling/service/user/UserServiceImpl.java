@@ -26,40 +26,11 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private PasswordEncoder encoder;
-    private JwtTokenProvider tokenProvider;
-    private AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder, JwtTokenProvider tokenProvider, AuthenticationManager authenticationManager) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.encoder = encoder;
-        this.tokenProvider = tokenProvider;
-        this.authenticationManager = authenticationManager;
-    }
-
-    public LoginUserDto signIn(LoginUserDto loginUser) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword()));
-            User foundUser = userRepository.findUserByEmail(loginUser.getUsername());
-            String token = tokenProvider.createToken(loginUser.getUsername(), foundUser.getRoles());
-            return new LoginUserDto(foundUser.getId(), foundUser.getEmail(), foundUser.getPassword(), token);
-        } catch (AuthenticationException e) {
-            throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-    }
-
-    public String signUp(User user) {
-        if (userRepository.findUserByEmail(user.getEmail()) == null) {
-            user.setPassword(encoder.encode(user.getPassword()));
-            userRepository.save(user);
-            return tokenProvider.createToken(user.getEmail(), user.getRoles());
-        } else {
-            throw new CustomException("Username is already in use", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-    }
-
-    public User whoami(HttpServletRequest req) {
-        return userRepository.findUserByEmail(tokenProvider.getUsername(tokenProvider.resolveToken(req)));
     }
 
     @Override

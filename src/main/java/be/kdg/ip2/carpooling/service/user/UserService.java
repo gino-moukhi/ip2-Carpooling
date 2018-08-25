@@ -8,12 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService {
-    LoginUserDto signIn(LoginUserDto loginUser);
-
-    String signUp(User user);
-
-    User whoami(HttpServletRequest req);
-
     User findUserById(String id) throws UserServiceException;
 
     UserDto findUserDtoById(String id) throws UserServiceException;

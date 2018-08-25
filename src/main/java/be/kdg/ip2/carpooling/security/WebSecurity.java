@@ -27,14 +27,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         // Entry points
         http.authorizeRequests()//
-                .antMatchers("/authentication/signin").permitAll()//
-                .antMatchers("/authentication/signup").permitAll()//
-                //.antMatchers("/h2-console/**/**").permitAll()
+                .antMatchers("/*").permitAll();
+                //.antMatchers("/authentication/*").permitAll()
                 // Disallow everything else..
-                .anyRequest().authenticated();
+                //.anyRequest().authenticated();
 
         // If a user try to access a resource without having enough permissions
-        http.exceptionHandling().accessDeniedPage("/welcome");
+        http.exceptionHandling().accessDeniedPage("/authentication");
 
         // Apply JWT
         http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));

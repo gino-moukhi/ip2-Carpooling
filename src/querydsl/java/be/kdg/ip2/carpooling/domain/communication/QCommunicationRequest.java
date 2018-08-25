@@ -34,7 +34,7 @@ public class QCommunicationRequest extends EntityPathBase<CommunicationRequest> 
 
     public final StringPath routeId = createString("routeId");
 
-    public final StringPath userId = createString("userId");
+    public final be.kdg.ip2.carpooling.domain.user.QRouteUser user;
 
     public QCommunicationRequest(String variable) {
         this(CommunicationRequest.class, forVariable(variable), INITS);
@@ -56,6 +56,7 @@ public class QCommunicationRequest extends EntityPathBase<CommunicationRequest> 
         super(type, metadata, inits);
         this.destination = inits.isInitialized("destination") ? new be.kdg.ip2.carpooling.domain.route.QRouteLocation(forProperty("destination"), inits.get("destination")) : null;
         this.origin = inits.isInitialized("origin") ? new be.kdg.ip2.carpooling.domain.route.QRouteLocation(forProperty("origin"), inits.get("origin")) : null;
+        this.user = inits.isInitialized("user") ? new be.kdg.ip2.carpooling.domain.user.QRouteUser(forProperty("user"), inits.get("user")) : null;
     }
 
 }

@@ -1,5 +1,6 @@
 package be.kdg.ip2.carpooling.domain.user;
 
+import be.kdg.ip2.carpooling.dto.RegisterUserDto;
 import be.kdg.ip2.carpooling.dto.UserDto;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -49,6 +50,18 @@ public class User {
         this.gender = userDto.getGender();
         this.smoker = userDto.isSmoker();
         this.vehicle = userDto.getVehicle();
+        this.roles = new ArrayList<>();
+    }
+
+    public User(RegisterUserDto registerUserDto) {
+        this.email = registerUserDto.getUsername();
+        this.password = registerUserDto.getPassword();
+        this.name = registerUserDto.getName();
+        this.address = new Address();
+        this.age = 0;
+        this.gender = null;
+        this.smoker = false;
+        this.vehicle = new Vehicle();
         this.roles = new ArrayList<>();
     }
 }
