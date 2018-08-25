@@ -109,6 +109,12 @@ public class CommunicationController {
         }
     }
 
+    @DeleteMapping
+    public void deleteCommunicationRequest(@RequestParam String routeId, @RequestParam String requestId) {
+        communicationService.deleteCommunicationRequestById(requestId);
+        routeService.deleteCommunicationRequestOfRoute(routeId, requestId);
+    }
+
     private CommunicationRequestStatus statusConverter(int status) {
         switch (status) {
             case 0:
